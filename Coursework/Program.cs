@@ -4,8 +4,11 @@ using Coursework.Interfaces.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
+Dapper.DefaultTypeMap.MatchNamesWithUnderscores = true;
+
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddTransient<DbConnectionFactory>();
 builder.Services.AddTransient<IUnitOfWorkFactory, UnitOfWorkFactory>();
 var connectionString = builder.Configuration.GetConnectionString("MainDbConnection");
 

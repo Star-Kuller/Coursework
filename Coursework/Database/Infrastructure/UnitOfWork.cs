@@ -1,4 +1,6 @@
+using Coursework.Database.Repositories;
 using Coursework.Interfaces.Database;
+using Coursework.Interfaces.Database.Repositories;
 using Npgsql;
 
 namespace Coursework.Database.Infrastructure;
@@ -6,6 +8,8 @@ namespace Coursework.Database.Infrastructure;
 public class UnitOfWork(NpgsqlConnection connection, NpgsqlTransaction transaction) : IUnitOfWork
 {
     private bool _commited;
+
+    public IProgrammingLanguageRepository Languages => new ProgrammingLanguageRepository(connection, transaction);
 
     public async Task CommitAsync(CancellationToken token)
     {

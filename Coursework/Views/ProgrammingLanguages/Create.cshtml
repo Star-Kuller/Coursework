@@ -1,0 +1,42 @@
+@model ProgrammingLanguage
+
+@{
+    ViewData["Title"] = "Добавить язык программирования";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Добавить язык программирования</h1>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Добавить язык программирования</h5>
+                    <form method="post" action="/ProgrammingLanguages/Create">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Название языка</label>
+                            <input type="text" class="form-control rounded-pill" id="Name" name="Name" placeholder="Введите название языка">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Описание языка</label>
+                            <textarea class="form-control rounded" id="Description" name="Description" rows="3" placeholder="Введите описание языка"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary rounded-pill">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
