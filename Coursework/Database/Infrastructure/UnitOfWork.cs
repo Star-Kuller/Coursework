@@ -11,6 +11,8 @@ public class UnitOfWork(NpgsqlConnection connection, NpgsqlTransaction transacti
 
     public IProgrammingLanguageRepository Languages => new ProgrammingLanguageRepository(connection, transaction);
     public IFrameworkRepository Frameworks => new FrameworkRepository(connection, transaction);
+    public IDifficultyLevelRepository DifficultyLevels => new DifficultyLevelRepository(connection, transaction);
+    public IExerciseRepository Exercises => new ExerciseRepository(connection, transaction);
 
     public async Task CommitAsync(CancellationToken token)
     {

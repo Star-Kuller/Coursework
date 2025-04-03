@@ -1,11 +1,10 @@
 using System.ComponentModel.DataAnnotations;
+using Coursework.Models.Interfaces;
 
 namespace Coursework.Models;
 
-public class Framework
+public class Framework : Entity, IName
 {
-    public long Id { get; set; }
-    
     [Required(ErrorMessage = "Название фреймворка обязательно для заполнения.")]
     [StringLength(50, ErrorMessage = "Название не должно превышать 50 символов.")]
     public string Name { get; set; }

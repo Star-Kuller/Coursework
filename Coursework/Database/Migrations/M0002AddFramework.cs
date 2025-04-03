@@ -1,3 +1,4 @@
+using System.Data;
 using FluentMigrator;
 
 namespace Coursework.Database.Migrations;
@@ -15,7 +16,8 @@ public class M0002AddFramework : AutoReversingMigration
 
         Create.ForeignKey("FK_frameworks_programing_languages")
             .FromTable("frameworks").ForeignColumn("language_id")
-            .ToTable("programing_languages").PrimaryColumn("id");
+            .ToTable("programing_languages").PrimaryColumn("id")
+            .OnDelete(Rule.Cascade);
         
         Create.Index("IX_frameworks_language_id")
             .OnTable("frameworks")
