@@ -13,17 +13,16 @@
         <div class="col-md-6">
             <div class="card mt-5">
                 <div class="card-body">
-                    <h5 class="card-title text-center">Добавить язык программирования</h5>
-                    <form method="post" action="/ProgrammingLanguages/Create">
+                    <form method="post" asp-controller="ProgrammingLanguages" asp-action="Create">
                         <div class="mb-3">
                             <label for="Name" class="form-label">Название языка</label>
-                            <input type="text" class="form-control rounded-pill" id="Name" name="Name" placeholder="Введите название языка">
+                            <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название языка">
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
 
                         <div class="mb-3">
                             <label for="Description" class="form-label">Описание языка</label>
-                            <textarea class="form-control rounded" id="Description" name="Description" rows="3" placeholder="Введите описание языка"></textarea>
+                            <textarea class="form-control rounded" id="Description" asp-for="Description" rows="3" placeholder="Введите описание языка"></textarea>
                             <span asp-validation-for="Description" class="text-danger"></span>
                         </div>
 

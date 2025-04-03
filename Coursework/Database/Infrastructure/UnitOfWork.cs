@@ -10,6 +10,7 @@ public class UnitOfWork(NpgsqlConnection connection, NpgsqlTransaction transacti
     private bool _commited;
 
     public IProgrammingLanguageRepository Languages => new ProgrammingLanguageRepository(connection, transaction);
+    public IFrameworkRepository Frameworks => new FrameworkRepository(connection, transaction);
 
     public async Task CommitAsync(CancellationToken token)
     {

@@ -1,0 +1,52 @@
+@model Framework
+
+@{
+    ViewData["Title"] = "Добавить фреймворк";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Добавить фреймворк</h1>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <form method="post" asp-controller="Frameworks" asp-action="Create">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Название фреймворка</label>
+                            <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название фреймворка">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Описание фреймворка</label>
+                            <textarea class="form-control rounded" id="Description" asp-for="Description" rows="3" placeholder="Введите описание фреймворка"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label for="LanguageId" class="form-label">Язык программирования</label>
+                            <select class="form-select rounded-pill" id="LanguageId" asp-for="LanguageId">
+                                <option value="">-- Выберите язык программирования --</option>
+                                @foreach (var language in (ViewBag.Languages as IEnumerable<ProgrammingLanguage>)!)
+                                {
+                                    <option value="@language.Id" title="@language.Description">@language.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="LanguageId" class="text-danger"></span>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary rounded-pill">Отправить</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

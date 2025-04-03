@@ -6,6 +6,7 @@ namespace Coursework.Controllers;
 
 public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
+    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Create()
     {
         return View();
@@ -15,8 +16,6 @@ public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogg
     public async Task<IActionResult> Create(ProgrammingLanguage language, CancellationToken ct)
     {
         if (!ModelState.IsValid) return View(language);
-        
-        logger.LogTrace($"Добавлен язык программирования. Название:{language.Name}, Описание:{language.Description}");
         
         await using var uow = await uowFactory.CreateAsync(ct);
         var id = await uow.Languages.AddAsync(language);
