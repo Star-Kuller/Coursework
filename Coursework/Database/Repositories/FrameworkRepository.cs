@@ -73,4 +73,29 @@ public class FrameworkRepository(IDbConnection connection, IDbTransaction transa
         var result = await connection.QueryAsync<Framework>(sql, transaction);
         return result.ToList();
     }
+
+    public async Task<List<Framework>> GetAllWithLanguageAsync()
+    {
+        const string sql = """
+                           SELECT 
+                               f.*, 
+                               pl.*
+                           FROM frameworks f
+                           LEFT JOIN programing_languages pl ON f.language_id = pl.id
+                           ORDER BY f.id
+                           """;
+
+        var result = await connection.QueryAsync<Framework, ProgrammingLanguage, Framework>(
+            sql,
+            (framework, language) =>
+            {
+                framework.Language = language;
+                return framework;
+            },
+            splitOn: "language_id",
+            transaction: transaction
+        );
+
+        return result.ToList();
+    }
 }

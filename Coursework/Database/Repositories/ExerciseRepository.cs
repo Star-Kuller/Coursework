@@ -82,13 +82,6 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
     public async Task DeleteAsync(long id)
     {
-        const string deleteFrameworksSql = """
-            DELETE FROM frameworks_exercises
-            WHERE exercise_id = @ExerciseId
-            """;
-
-        await connection.ExecuteAsync(deleteFrameworksSql, new { ExerciseId = id }, transaction);
-        
         const string deleteExerciseSql = """
             DELETE FROM exercises
             WHERE id = @Id

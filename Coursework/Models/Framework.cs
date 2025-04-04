@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using Coursework.Models.Interfaces;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace Coursework.Models;
 
@@ -15,4 +16,7 @@ public class Framework : Entity, IName
     
     [Required(ErrorMessage = "Язык программирования обязателен.")]
     public long? LanguageId { get; set; }
+
+    [ValidateNever]
+    public ProgrammingLanguage? Language { get; set; }
 }

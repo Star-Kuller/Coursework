@@ -1,11 +1,11 @@
 @model Framework
 
 @{
-    ViewData["Title"] = "Добавить фреймворк";
+    ViewData["Title"] = "Редактировать фреймворк";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Добавить фреймворк</h1>
+    <h1 class="display-4">Редактировать фреймворк</h1>
 </div>
 
 <div class="container">
@@ -13,7 +13,7 @@
         <div class="col-md-6">
             <div class="card mt-5">
                 <div class="card-body">
-                    <form method="post" asp-controller="Frameworks" asp-action="Create">
+                    <form method="post" asp-controller="Frameworks" asp-action="Update">
                         <div class="mb-3">
                             <label for="Name" class="form-label">Название фреймворка</label>
                             <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название фреймворка">
@@ -38,7 +38,7 @@
                         </div>
                         
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary rounded-pill">Добавить</button>
+                            <button type="submit" class="btn btn-primary rounded-pill">Обновить</button>
                         </div>
                     </form>
                 </div>

@@ -1,11 +1,11 @@
-@model ProgrammingLanguage
+@model Framework
 
 @{
-    ViewData["Title"] = "Список языков программирования";
+    ViewData["Title"] = "Список фреймворков";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Языки программирования</h1>
+    <h1 class="display-4">Фреймворки</h1>
 </div>
 
 <div class="container">
@@ -13,7 +13,7 @@
         <a 
             class="btn btn-primary rounded-pill"
             style="width: 200px;"
-            asp-controller="ProgrammingLanguages"
+            asp-controller="Frameworks"
             asp-action="Create">Добавить</a>
     </div>
     <table class="table">
@@ -21,29 +21,31 @@
         <tr>
             <th scope="col">Id</th>
             <th scope="col">Название</th>
+            <th scope="col">Язык программирования</th>
             <th style="width: 1%;" scope="col"></th>
             <th style="width: 1%;" scope="col"></th>
         </tr>
         </thead>
         <tbody class="table-group-divider">
-        @foreach (var language in ViewBag.Languages)
+        @foreach (var framework in ViewBag.Languages)
         {
-            <tr title="@language.Description">
-                <th scope="row">@language.Id</th>
-                <td>@language.Name</td>
+            <tr title="@framework.Description">
+                <th scope="row">@framework.Id</th>
+                <td>@framework.Name</td>
+                <td>@framework.Language.Name</td>
                 <td>
                     <a class="btn btn-secondary btn-sm rounded-pill"
-                       asp-controller="ProgrammingLanguages"
+                       asp-controller="Frameworks"
                        asp-action="Update" 
-                       asp-route-id="@language.Id">Редактировать</a>
+                       asp-route-id="@framework.Id">Редактировать</a>
                 </td>
                 <td>
                     <form 
                         method="post" 
-                        asp-controller="ProgrammingLanguages" 
+                        asp-controller="Frameworks" 
                         asp-action="Delete" 
-                        asp-route-id="@language.Id"
-                        onsubmit="return confirm('Вы уверены, что хотите удалить этот язык программирования?');"
+                        asp-route-id="@framework.Id"
+                        onsubmit="return confirm('Вы уверены, что хотите удалить этот фреймворк?');"
                         >
                         <button type="submit" class="btn btn-danger btn-sm rounded-pill">Удалить</button>
                     </form>

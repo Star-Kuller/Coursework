@@ -75,7 +75,7 @@
                             <div class="input-group">
                                 <select class="form-select rounded-pill" id="FrameworkId" name="FrameworkId">
                                     <option value="">-- Выберите фреймворк --</option>
-                                    @foreach (var framework in (ViewBag.Frameworks as IEnumerable<Framework>)!)
+                                    @foreach (var framework in ViewBag.Frameworks)
                                     {
                                         <option value="@framework.Id" title="@framework.Description">@framework.Name</option>
                                     }

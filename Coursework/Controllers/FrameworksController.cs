@@ -6,7 +6,16 @@ namespace Coursework.Controllers;
 
 public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var frameworks = await uow.Frameworks.GetAllWithLanguageAsync();
+        
+        ViewBag.Languages = frameworks;
+        
+        return View();
+    }
+    
     public async Task<IActionResult> Create(CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
@@ -15,6 +24,17 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
         ViewBag.Languages = languages;
 
         return View();
+    }
+    
+    public async Task<IActionResult> Update(long id, CancellationToken ct)
+    {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var framework = await uow.Frameworks.GetAsync(id);
+        
+        var languages = await uow.Languages.GetAllAsync();
+        ViewBag.Languages = languages;
+        
+        return View(framework);
     }
     
     [HttpPost]
@@ -34,6 +54,34 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
         
         logger.LogInformation("Добавлен фреймворк. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}", id, framework.Name, framework.Description);
             
-        return RedirectToAction("Index", "Home");
+        return RedirectToAction("Index");
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Update(Framework framework, CancellationToken ct)
+    {
+        if (!ModelState.IsValid) return View(framework);
+        
+        await using var uow = await uowFactory.CreateAsync(ct);
+        await uow.Frameworks.UpdateAsync(framework);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation(
+            "Обновлен язык программирования. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}", 
+            framework.Id, framework.Name, framework.Description);
+        
+        return RedirectToAction("Index");
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Delete(long id, CancellationToken ct)
+    {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        await uow.Frameworks.DeleteAsync(id);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation("Удален фреймворк. Id:{Id}", id);
+        
+        return RedirectToAction("Index");
     }
 }
