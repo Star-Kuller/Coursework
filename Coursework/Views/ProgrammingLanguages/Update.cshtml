@@ -1,11 +1,11 @@
 @model ProgrammingLanguage
 
 @{
-    ViewData["Title"] = "Добавить язык программирования";
+    ViewData["Title"] = "Редактировать язык программирования";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Добавить язык программирования</h1>
+    <h1 class="display-4">Редактировать язык программирования</h1>
 </div>
 
 <div class="container">
@@ -13,7 +13,7 @@
         <div class="col-md-6">
             <div class="card mt-5">
                 <div class="card-body">
-                    <form method="post" asp-controller="ProgrammingLanguages" asp-action="Create">
+                    <form method="post" asp-controller="ProgrammingLanguages" asp-action="Update">
                         <div class="mb-3">
                             <label for="Name" class="form-label">Название языка</label>
                             <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название языка">
@@ -27,7 +27,7 @@
                         </div>
 
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary rounded-pill">Добавить</button>
+                            <button type="submit" class="btn btn-primary rounded-pill">Обновить</button>
                         </div>
                     </form>
                 </div>

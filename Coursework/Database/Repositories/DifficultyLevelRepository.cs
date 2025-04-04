@@ -12,6 +12,7 @@ public class DifficultyLevelRepository(IDbConnection connection, IDbTransaction 
         const string sql = """
                            SELECT id, name
                            FROM difficulty_levels
+                           ORDER BY id
                            """;
 
         var result = await connection.QueryAsync<DifficultyLevel>(sql, transaction);

@@ -67,6 +67,7 @@ public class ProgrammingLanguageRepository(IDbConnection connection, IDbTransact
         const string sql = """
                            SELECT id, name, description
                            FROM programing_languages
+                           ORDER BY id
                            """;
 
         var result = await connection.QueryAsync<ProgrammingLanguage>(sql, transaction);

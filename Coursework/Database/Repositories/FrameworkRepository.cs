@@ -67,6 +67,7 @@ public class FrameworkRepository(IDbConnection connection, IDbTransaction transa
         const string sql = """
                            SELECT *
                            FROM frameworks
+                           ORDER BY id
                            """;
 
         var result = await connection.QueryAsync<Framework>(sql, transaction);

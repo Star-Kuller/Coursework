@@ -1,0 +1,55 @@
+@model ProgrammingLanguage
+
+@{
+    ViewData["Title"] = "Список языков программирования";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Языки программирования</h1>
+</div>
+
+<div class="container">
+    <div class="d-grid d-md-flex justify-content-md-end">
+        <a 
+            class="btn btn-primary rounded-pill"
+            style="width: 200px;"
+            asp-controller="ProgrammingLanguages"
+            asp-action="Create">Добавить</a>
+    </div>
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Название</th>
+            <th style="width: 1%;" scope="col"></th>
+            <th style="width: 1%;" scope="col"></th>
+        </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        @foreach (var language in ViewBag.Languages)
+        {
+            <tr>
+                <th scope="row">@language.Id</th>
+                <td>@language.Name</td>
+                <td>
+                    <a class="btn btn-secondary btn-sm rounded-pill"
+                       asp-controller="ProgrammingLanguages"
+                       asp-action="Update" 
+                       asp-route-id="@language.Id">Редактировать</a>
+                </td>
+                <td>
+                    <form 
+                        method="post" 
+                        asp-controller="ProgrammingLanguages" 
+                        asp-action="Delete" 
+                        asp-route-id="@language.Id"
+                        onsubmit="return confirm('Вы уверены, что хотите удалить этот язык программирования?');"
+                        >
+                        <button type="submit" class="btn btn-danger btn-sm rounded-pill">Удалить</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

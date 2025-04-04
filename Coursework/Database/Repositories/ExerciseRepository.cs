@@ -145,6 +145,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             SELECT e.*, d.id AS DifficultyId, d.name AS DifficultyName
             FROM exercises e
             LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
+            ORDER BY e.id
             """;
 
         var exercises = await connection.QueryAsync<Exercise, DifficultyLevel, Exercise>(
