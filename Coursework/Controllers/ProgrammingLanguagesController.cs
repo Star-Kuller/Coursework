@@ -25,6 +25,8 @@ public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogg
     {
         await using var uow = await uowFactory.CreateAsync(ct);
         var language = await uow.Languages.GetAsync(id);
+        if (language is null)
+            return NotFound();
         
         return View(language);
     }
@@ -39,7 +41,7 @@ public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogg
         await uow.CommitAsync(ct);
         
         logger.LogInformation(
-            "Добавлен язык программирования. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}",
+            "Добавлен язык программирования. Id:{Id}, Название:{Name}, Описание:{Description}",
             id, language.Name, language.Description);
         
         return RedirectToAction("Index");

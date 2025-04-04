@@ -27,9 +27,9 @@
         </tr>
         </thead>
         <tbody class="table-group-divider">
-        @foreach (var framework in ViewBag.Languages)
+        @foreach (var framework in ViewBag.Frameworks)
         {
-            <tr title="@framework.Description">
+            <tr data-bs-toggle="tooltip" title="@framework.Description">
                 <th scope="row">@framework.Id</th>
                 <td>@framework.Name</td>
                 <td>@framework.Language.Name</td>

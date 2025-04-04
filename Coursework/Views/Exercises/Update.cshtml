@@ -1,0 +1,216 @@
+@model Exercise
+
+@{
+    ViewData["Title"] = "Редактировать упражнение";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Редактировать упражнение</h1>
+</div>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card mt-5">
+                <div class="card-body">
+                    <form method="post" asp-controller="Exercises" asp-action="Update">
+                        <!-- Название -->
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Название упражнения</label>
+                            <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название упражнения">
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <!-- Уровень сложности -->
+                        <div class="mb-3">
+                            <label for="DifficultyId" class="form-label">Уровень сложности</label>
+                            <select class="form-select rounded-pill" id="DifficultyId" asp-for="DifficultyId">
+                                <option value="">-- Выберите уровень сложности --</option>
+                                @foreach (var difficulty in (ViewBag.DifficultyLevels as IEnumerable<DifficultyLevel>)!)
+                                {
+                                    <option value="@difficulty.Id">@difficulty.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="DifficultyId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Количество баллов -->
+                        <div class="mb-3">
+                            <label for="Score" class="form-label">Количество баллов</label>
+                            <input type="number" class="form-control rounded-pill" id="Score" asp-for="Score" placeholder="Введите количество баллов">
+                            <span asp-validation-for="Score" class="text-danger"></span>
+                        </div>
+
+                        <!-- Краткое описание -->
+                        <div class="mb-3">
+                            <label for="ShortDescription" class="form-label">Краткое описание</label>
+                            <textarea class="form-control rounded" id="ShortDescription" asp-for="ShortDescription" rows="2" placeholder="Введите краткое описание"></textarea>
+                            <span asp-validation-for="ShortDescription" class="text-danger"></span>
+                        </div>
+
+                        <!-- Полное описание -->
+                        <div class="mb-3">
+                            <label for="FullDescription" class="form-label">Текст упражнения</label>
+                            <textarea class="form-control rounded" id="FullDescription" asp-for="FullDescription" rows="4" placeholder="Введите текст упражнения и задание"></textarea>
+                            <span asp-validation-for="FullDescription" class="text-danger"></span>
+                        </div>
+
+                        <!-- Ключ S3 для материалов -->
+                        <div class="mb-3">
+                            <label for="S3KeySource" class="form-label">Ключ S3 для материалов упражнения</label>
+                            <input type="text" class="form-control rounded-pill" id="S3KeySource" asp-for="S3KeySource" placeholder="Введите ключ S3 для материалов">
+                            <span asp-validation-for="S3KeySource" class="text-danger"></span>
+                        </div>
+
+                        <!-- Ключ S3 для тестов -->
+                        <div class="mb-3">
+                            <label for="S3KeyTests" class="form-label">Ключ S3 для тестов</label>
+                            <input type="text" class="form-control rounded-pill" id="S3KeyTests" asp-for="S3KeyTests" placeholder="Введите ключ S3 для тестов">
+                            <span asp-validation-for="S3KeyTests" class="text-danger"></span>
+                        </div>
+
+                        <!-- Выбор фреймворков -->
+                        <div class="mb-3">
+                            <label for="FrameworkId" class="form-label">Фреймворки</label>
+                            <div class="input-group">
+                                <select class="form-select rounded-pill" id="FrameworkId" name="FrameworkId">
+                                    <option value="">-- Выберите фреймворк --</option>
+                                    @foreach (var framework in ViewBag.Frameworks)
+                                    {
+                                        <option value="@framework.Id" title="@framework.Description">@framework.Name</option>
+                                    }
+                                </select>
+                                <button type="button" class="btn btn-primary rounded-pill ms-2" onclick="addFrameworkButton()">Добавить</button>
+                            </div>
+                        </div>
+
+                        <!-- Список выбранных фреймворков -->
+                        <div id="selectedFrameworks" class="mt-2">
+                            <!-- Фреймворки будут добавляться сюда -->
+                        </div>
+
+                        <!-- Кнопки сохранения -->
+                        <div class="d-flex gap-2 mt-4">
+                            <button type="submit" class="btn btn-secondary rounded-pill flex-grow-1" onclick="setIsPublished(false)">Сохранить</button>
+                            <button type="submit" class="btn btn-success rounded-pill flex-grow-1" onclick="setIsPublished(true)">Опубликовать</button>
+                        </div>
+
+                        <!-- Скрытое поле для IsPublished -->
+                        <input type="hidden" id="IsPublished" name="IsPublished" value="false"/>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial"/>
+
+    <script>
+    // Массив для хранения выбранных фреймворков
+    let selectedFrameworks = [];
+
+    // Добавление фреймворка в массив
+    function addFrameworkButton() {
+        const select = document.getElementById('FrameworkId');
+        const selectedOption = select.options[select.selectedIndex];
+        const framework = {
+            id: selectedOption.value,
+            name: selectedOption.text
+        };
+
+        if (!framework.id) {
+            alert('Выберите фреймворк!');
+            return;
+        }
+
+        if (selectedFrameworks.some(f => f.id === framework.id)) {
+            alert('Этот фреймворк уже добавлен!');
+            return;
+        }
+
+        selectedFrameworks.push(framework);
+        renderSelectedFrameworks();
+    }
+
+    // Отображение списка выбранных фреймворков
+    function renderSelectedFrameworks() {
+        const container = document.getElementById('selectedFrameworks');
+        container.innerHTML = '';
+
+        selectedFrameworks.forEach((framework, index) => {
+            const div = document.createElement('div');
+            div.className = 'd-flex align-items-center mb-2 rounded-pill';
+
+            const span = document.createElement('span');
+            span.className = 'me-2';
+            span.textContent = framework.name;
+
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.className = 'btn btn-sm btn-danger rounded-pill';
+            button.textContent = 'Убрать';
+            button.onclick = () => removeFramework(index);
+
+            div.appendChild(span);
+            div.appendChild(button);
+
+            container.appendChild(div);
+        });
+    }
+
+    // Удаление фреймворка из массива
+    function removeFramework(index) {
+        selectedFrameworks.splice(index, 1);
+        renderSelectedFrameworks();
+    }
+
+    // Установка значения IsPublished
+    function setIsPublished(value) {
+        document.getElementById('IsPublished').value = value;
+    }
+
+    // Создание скрытых инпутов перед отправкой формы
+    document.getElementById('exerciseForm').addEventListener('submit', function () {
+        const form = this;
+
+        // Очистка старых скрытых инпутов
+        const oldInputs = form.querySelectorAll('input[name^="Frameworks"]');
+        oldInputs.forEach(input => input.remove());
+
+        // Создание новых скрытых инпутов
+        selectedFrameworks.forEach((framework, index) => {
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = `Frameworks[${index}].Id`;
+            idInput.value = framework.id;
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'hidden';
+            nameInput.name = `Frameworks[${index}].Name`;
+            nameInput.value = framework.name;
+
+            form.appendChild(idInput);
+            form.appendChild(nameInput);
+        });
+    });
+
+    // Инициализация выбранных фреймворков из ViewBag
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (ViewBag.SelectedFrameworks != null)
+        {
+            foreach (var framework in ViewBag.SelectedFrameworks)
+            {
+                <text>
+        selectedFrameworks.push({
+            id: '@framework.Id',
+            name: '@framework.Name'
+        });
+        </text>
+            }
+        }
+        renderSelectedFrameworks();
+    });
+</script>
+}

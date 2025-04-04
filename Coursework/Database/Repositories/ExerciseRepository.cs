@@ -93,7 +93,8 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     public async Task<Exercise?> GetAsync(long id)
     {
         const string sql = """
-            SELECT e.*, d.id AS DifficultyId, d.name AS DifficultyName
+            SELECT e.*,
+                   d.*
             FROM exercises e
             LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
             WHERE e.id = @Id
@@ -109,14 +110,14 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
         var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, Exercise>(
             sql,
-            (e, d) =>
+            (exercise, difficulty) =>
             {
-                e.Difficulty = d;
-                return e;
+                exercise.Difficulty = difficulty;
+                return exercise;
             },
             new { Id = id },
             transaction,
-            splitOn: "DifficultyId"
+            splitOn: "id"
         );
 
         var result = exercise.FirstOrDefault();
@@ -135,7 +136,8 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     public async Task<List<Exercise>> GetAllAsync()
     {
         const string sql = """
-            SELECT e.*, d.id AS DifficultyId, d.name AS DifficultyName
+            SELECT e.*,
+                   d.*
             FROM exercises e
             LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
             ORDER BY e.id
@@ -143,13 +145,13 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
         var exercises = await connection.QueryAsync<Exercise, DifficultyLevel, Exercise>(
             sql,
-            (e, d) =>
+            (exercise, difficulty) =>
             {
-                e.Difficulty = d;
-                return e;
+                exercise.Difficulty = difficulty;
+                return exercise;
             },
             transaction: transaction,
-            splitOn: "DifficultyId"
+            splitOn: "id"
         );
 
         return exercises.ToList();

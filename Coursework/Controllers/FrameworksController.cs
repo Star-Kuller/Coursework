@@ -11,7 +11,7 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
         await using var uow = await uowFactory.CreateAsync(ct);
         var frameworks = await uow.Frameworks.GetAllWithLanguageAsync();
         
-        ViewBag.Languages = frameworks;
+        ViewBag.Frameworks = frameworks;
         
         return View();
     }
@@ -30,6 +30,8 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
     {
         await using var uow = await uowFactory.CreateAsync(ct);
         var framework = await uow.Frameworks.GetAsync(id);
+        if (framework is null)
+            return NotFound();
         
         var languages = await uow.Languages.GetAllAsync();
         ViewBag.Languages = languages;
@@ -67,8 +69,8 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
         await uow.CommitAsync(ct);
         
         logger.LogInformation(
-            "Обновлен язык программирования. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}", 
-            framework.Id, framework.Name, framework.Description);
+            "Обновлен фреймворк. Id:{Id}, Название:{Name}, Описание:{Description}, Id языка программирования:{LanguageId}", 
+            framework.Id, framework.Name, framework.Description, framework.LanguageId);
         
         return RedirectToAction("Index");
     }

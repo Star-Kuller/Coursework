@@ -1,11 +1,11 @@
-@model ProgrammingLanguage
+@model Exercise
 
 @{
-    ViewData["Title"] = "Список языков программирования";
+    ViewData["Title"] = "Список упражнений";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Языки программирования</h1>
+    <h1 class="display-4">Упражнения</h1>
 </div>
 
 <div class="container">
@@ -13,7 +13,7 @@
         <a 
             class="btn btn-primary rounded-pill"
             style="width: 200px;"
-            asp-controller="ProgrammingLanguages"
+            asp-controller="Exercises"
             asp-action="Create">Добавить</a>
     </div>
     <table class="table">
@@ -21,30 +21,35 @@
         <tr>
             <th scope="col">Id</th>
             <th scope="col">Название</th>
+            <th scope="col">Сложность</th>
+            <th scope="col">Короткое описание</th>
+            <th scope="col">Опубликовано?</th>
             <th style="width: 1%;" scope="col"></th>
             <th style="width: 1%;" scope="col"></th>
         </tr>
         </thead>
         <tbody class="table-group-divider">
-        @foreach (var language in ViewBag.Languages)
+        @foreach (var exercises in ViewBag.Exercises)
         {
-            <tr data-bs-toggle="tooltip" title="@language.Description">
-                <th scope="row">@language.Id</th>
-                <td>@language.Name</td>
+            <tr>
+                <th scope="row">@exercises.Id</th>
+                <td>@exercises.Name</td>
+                <td>@exercises.Difficulty.Name</td>
+                <td>@exercises.ShortDescription</td>
+                <td>@(exercises.IsPublished ? "Да" : "Нет")</td>
                 <td>
                     <a class="btn btn-secondary btn-sm rounded-pill"
-                       asp-controller="ProgrammingLanguages"
+                       asp-controller="Exercises"
                        asp-action="Update" 
-                       asp-route-id="@language.Id">Редактировать</a>
+                       asp-route-id="@exercises.Id">Редактировать</a>
                 </td>
                 <td>
                     <form 
                         method="post" 
-                        asp-controller="ProgrammingLanguages" 
+                        asp-controller="Exercises" 
                         asp-action="Delete" 
-                        asp-route-id="@language.Id"
-                        onsubmit="return confirm('Вы уверены, что хотите удалить этот язык программирования?');"
-                        >
+                        asp-route-id="@exercises.Id"
+                        onsubmit="return confirm('Вы уверены, что хотите удалить этот упражнение?');">
                         <button type="submit" class="btn btn-danger btn-sm rounded-pill">Удалить</button>
                     </form>
                 </td>

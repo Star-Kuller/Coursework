@@ -92,7 +92,7 @@ public class FrameworkRepository(IDbConnection connection, IDbTransaction transa
                 framework.Language = language;
                 return framework;
             },
-            splitOn: "language_id",
+            splitOn: "id",
             transaction: transaction
         );
 
