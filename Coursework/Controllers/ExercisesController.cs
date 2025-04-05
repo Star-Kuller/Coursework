@@ -6,12 +6,13 @@ namespace Coursework.Controllers;
 
 public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
-    public async Task<IActionResult> Index(CancellationToken ct)
+    public async Task<IActionResult> Index(string search, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
-        var exercises = await uow.Exercises.GetAllAsync();
+        var exercises = await uow.Exercises.GetAllAsync(search);
         
         ViewBag.Exercises = exercises;
+        ViewBag.Search = search;
         
         return View();
     }
@@ -58,6 +59,7 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
 
             ViewBag.DifficultyLevels = difficultyLevels;
             ViewBag.Frameworks = frameworks;
+            ViewBag.SelectedFrameworks = exercise.Frameworks!;
 
             return View(exercise);
         }
@@ -75,6 +77,7 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
     [HttpPost]
     public async Task<IActionResult> Update(Exercise exercise, CancellationToken ct)
     {
+        ViewBag.SelectedFrameworks = exercise.Frameworks!;
         if (!ModelState.IsValid) return View(exercise);
         
         await using var uow = await uowFactory.CreateAsync(ct);

@@ -28,3 +28,17 @@ body {
   background-color: var(--bs-white);
   color: var(--bs-body-color);
 }
+
+
+.card-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.card-text::-webkit-scrollbar, .card-title::-webkit-scrollbar {
+  width: 0;
+}
+
+.mt-auto {
+  margin-top: auto;
+}

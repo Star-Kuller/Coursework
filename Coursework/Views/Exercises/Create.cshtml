@@ -13,7 +13,7 @@
         <div class="col-md-8">
             <div class="card mt-5">
                 <div class="card-body">
-                    <form method="post" asp-controller="Exercises" asp-action="Create">
+                    <form method="post" asp-controller="Exercises" asp-action="Create" id="exerciseForm">
                         <!-- Название -->
                         <div class="mb-3">
                             <label for="Name" class="form-label">Название упражнения</label>
@@ -80,7 +80,7 @@
                                         <option value="@framework.Id" title="@framework.Description">@framework.Name</option>
                                     }
                                 </select>
-                                <button type="button" class="btn btn-primary rounded-pill ms-2" onclick="addFramework()">Добавить</button>
+                                <button type="button" class="btn btn-primary rounded-pill ms-2" onclick="addFrameworkButton()">Добавить</button>
                             </div>
                         </div>
 
@@ -105,55 +105,112 @@
 </div>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial"/>
 
     <script>
-        // Добавление фреймворка в список
-        function addFramework() {
-            const select = document.getElementById('FrameworkId');
-            const selectedOption = select.options[select.selectedIndex];
-            if (!selectedOption.value) return;
+    // Массив для хранения выбранных фреймворков
+    let selectedFrameworks = [];
 
-            const frameworkId = selectedOption.value;
-            const frameworkName = selectedOption.text;
-            
-            if (document.querySelector(`#selectedFrameworks input[value="${frameworkId}"]`)) {
-                alert('Этот фреймворк уже добавлен!');
-                return;
-            }
+    // Добавление фреймворка в массив
+    function addFrameworkButton() {
+        const select = document.getElementById('FrameworkId');
+        const selectedOption = select.options[select.selectedIndex];
+        const framework = {
+            id: selectedOption.value,
+            name: selectedOption.text
+        };
 
-            // Создаем контейнер для нового фреймворка
+        if (!framework.id) {
+            alert('Выберите фреймворк!');
+            return;
+        }
+
+        if (selectedFrameworks.some(f => f.id === framework.id)) {
+            alert('Этот фреймворк уже добавлен!');
+            return;
+        }
+
+        selectedFrameworks.push(framework);
+        renderSelectedFrameworks();
+    }
+
+    // Отображение списка выбранных фреймворков
+    function renderSelectedFrameworks() {
+        const container = document.getElementById('selectedFrameworks');
+        container.innerHTML = '';
+
+        selectedFrameworks.forEach((framework, index) => {
             const div = document.createElement('div');
             div.className = 'd-flex align-items-center mb-2 rounded-pill';
 
-            // Индекс для нового фреймворка
-            const index = document.querySelectorAll('#selectedFrameworks > div').length;
-
-            // Поле Id
-            const idInput = document.createElement('input');
-            idInput.type = 'hidden';
-            idInput.name = `Frameworks[${index}].Id`;
-            idInput.value = frameworkId;
-
             const span = document.createElement('span');
             span.className = 'me-2';
-            span.textContent = frameworkName;
+            span.textContent = framework.name;
 
             const button = document.createElement('button');
             button.type = 'button';
             button.className = 'btn btn-sm btn-danger rounded-pill';
             button.textContent = 'Убрать';
-            button.onclick = () => div.remove();
+            button.onclick = () => removeFramework(index);
 
-            div.appendChild(idInput);
             div.appendChild(span);
             div.appendChild(button);
 
-            document.getElementById('selectedFrameworks').appendChild(div);
-        }
+            container.appendChild(div);
+        });
+    }
 
-        function setIsPublished(value) {
-            document.getElementById('IsPublished').value = value;
+    // Удаление фреймворка из массива
+    function removeFramework(index) {
+        selectedFrameworks.splice(index, 1);
+        renderSelectedFrameworks();
+    }
+
+    // Установка значения IsPublished
+    function setIsPublished(value) {
+        document.getElementById('IsPublished').value = value;
+    }
+
+    // Создание скрытых инпутов перед отправкой формы
+    document.getElementById('exerciseForm').addEventListener('submit', function () {
+        const form = this;
+
+        // Очистка старых скрытых инпутов
+        const oldInputs = form.querySelectorAll('input[name^="Frameworks"]');
+        oldInputs.forEach(input => input.remove());
+
+        // Создание новых скрытых инпутов
+        selectedFrameworks.forEach((framework, index) => {
+            const idInput = document.createElement('input');
+            idInput.type = 'hidden';
+            idInput.name = `Frameworks[${index}].Id`;
+            idInput.value = framework.id;
+
+            const nameInput = document.createElement('input');
+            nameInput.type = 'hidden';
+            nameInput.name = `Frameworks[${index}].Name`;
+            nameInput.value = framework.name;
+
+            form.appendChild(idInput);
+            form.appendChild(nameInput);
+        });
+    });
+
+    // Инициализация выбранных фреймворков из ViewBag
+    document.addEventListener('DOMContentLoaded', function () {
+        @if (ViewBag.SelectedFrameworks != null)
+        {
+            foreach (var framework in ViewBag.SelectedFrameworks)
+            {
+                <text>
+                    selectedFrameworks.push({
+                        id: '@framework.Id',
+                        name: '@framework.Name'
+                    });
+                </text>
+            }
         }
+        renderSelectedFrameworks();
+    });
     </script>
 }

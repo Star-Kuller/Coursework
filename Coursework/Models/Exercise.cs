@@ -17,7 +17,7 @@ public class Exercise : Entity, IName
     [Required(ErrorMessage = "Количество очков обязательно.")]
     public long Score { get; set; }
 
-    [StringLength(250, ErrorMessage = "Краткое описание не должно превышать 250 символов.")]
+    [StringLength(150, ErrorMessage = "Краткое описание не должно превышать 150 символов.")]
     public string? ShortDescription { get; set; }
 
     [Required(ErrorMessage = "Текст упражнения обязателен.")]

@@ -135,13 +135,21 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
     public async Task<List<Exercise>> GetAllAsync()
     {
+        return await GetAllAsync(null);
+    }
+
+    public async Task<List<Exercise>> GetAllAsync(string? search)
+    {
         const string sql = """
-            SELECT e.*,
-                   d.*
-            FROM exercises e
-            LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
-            ORDER BY e.id
-            """;
+                           SELECT e.*,
+                                  d.*
+                           FROM exercises e
+                           LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
+                           WHERE @SearchPattern IS NULL 
+                              OR e.name LIKE @SearchPattern
+                              OR e.short_description LIKE @SearchPattern
+                           ORDER BY e.id
+                           """;
 
         var exercises = await connection.QueryAsync<Exercise, DifficultyLevel, Exercise>(
             sql,
@@ -149,6 +157,10 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             {
                 exercise.Difficulty = difficulty;
                 return exercise;
+            },
+            new
+            {
+                SearchPattern = search != null ? $"%{search}%" : null
             },
             transaction: transaction,
             splitOn: "id"

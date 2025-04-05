@@ -13,7 +13,7 @@
         <div class="col-md-8">
             <div class="card mt-5">
                 <div class="card-body">
-                    <form method="post" asp-controller="Exercises" asp-action="Update">
+                    <form method="post" asp-controller="Exercises" asp-action="Update" id="exerciseForm">
                         <!-- Название -->
                         <div class="mb-3">
                             <label for="Name" class="form-label">Название упражнения</label>
@@ -203,14 +203,14 @@
             foreach (var framework in ViewBag.SelectedFrameworks)
             {
                 <text>
-        selectedFrameworks.push({
-            id: '@framework.Id',
-            name: '@framework.Name'
-        });
-        </text>
+                    selectedFrameworks.push({
+                        id: '@framework.Id',
+                        name: '@framework.Name'
+                    });
+                </text>
             }
         }
         renderSelectedFrameworks();
     });
-</script>
+    </script>
 }
