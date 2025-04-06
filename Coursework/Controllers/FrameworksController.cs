@@ -1,5 +1,6 @@
 using Coursework.Interfaces.Database;
 using Coursework.Models;
+using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.Controllers;

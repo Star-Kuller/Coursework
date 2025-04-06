@@ -1,6 +1,7 @@
 using System.Data;
 using Coursework.Interfaces.Database.Repositories;
 using Coursework.Models;
+using Coursework.Models.Entities;
 using Dapper;
 
 namespace Coursework.Database.Repositories;
@@ -94,9 +95,15 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     {
         const string sql = """
             SELECT e.*,
-                   d.*
+                   d.*,
+                   s.*
             FROM exercises e
             LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
+            LEFT JOIN (
+                SELECT *
+                FROM solutions
+                WHERE by_exercise_author = TRUE
+            ) s ON e.id = s.exercise_id
             WHERE e.id = @Id
             LIMIT 1
             """;
@@ -108,11 +115,12 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             WHERE fe.exercise_id = @ExerciseId
             """;
 
-        var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, Exercise>(
+        var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, Solution, Exercise>(
             sql,
-            (exercise, difficulty) =>
+            (exercise, difficulty, solution) =>
             {
                 exercise.Difficulty = difficulty;
+                exercise.AuthorSolution = solution;
                 return exercise;
             },
             new { Id = id },

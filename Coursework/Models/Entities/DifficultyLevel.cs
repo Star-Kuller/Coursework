@@ -1,6 +1,6 @@
 using Coursework.Models.Interfaces;
 
-namespace Coursework.Models;
+namespace Coursework.Models.Entities;
 
 public class DifficultyLevel : Entity, IName
 {

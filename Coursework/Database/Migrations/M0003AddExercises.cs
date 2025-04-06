@@ -49,12 +49,12 @@ public class M0003AddExercises : AutoReversingMigration
         Create.ForeignKey("FK_frameworks_exercises_frameworks")
             .FromTable("frameworks_exercises").ForeignColumn("framework_id")
             .ToTable("frameworks").PrimaryColumn("id")
-            .OnDelete(Rule.Cascade);;
+            .OnDelete(Rule.Cascade);
 
         Create.ForeignKey("FK_frameworks_exercises_exercises")
             .FromTable("frameworks_exercises").ForeignColumn("exercise_id")
             .ToTable("exercises").PrimaryColumn("id")
-            .OnDelete(Rule.Cascade);;
+            .OnDelete(Rule.Cascade);
         
         Create.Index("IX_frameworks_exercises_framework_id")
             .OnTable("frameworks_exercises")

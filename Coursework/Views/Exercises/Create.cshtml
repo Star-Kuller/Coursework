@@ -1,4 +1,5 @@
-@model Exercise
+@using Coursework.Models.Entities
+@model Coursework.Models.DTOs.ExerciseDto
 
 @{
     ViewData["Title"] = "Добавить упражнение";
@@ -67,6 +68,13 @@
                             <label for="S3KeyTests" class="form-label">Ключ S3 для тестов</label>
                             <input type="text" class="form-control rounded-pill" id="S3KeyTests" asp-for="S3KeyTests" placeholder="Введите ключ S3 для тестов">
                             <span asp-validation-for="S3KeyTests" class="text-danger"></span>
+                        </div>
+
+                        <!-- Ключ S3 для решения автора -->
+                        <div class="mb-3">
+                            <label for="S3KeyTests" class="form-label">Ключ S3 для решения</label>
+                            <input type="text" class="form-control rounded-pill" id="S3KeyAuthorSolution" asp-for="S3KeyAuthorSolution" placeholder="Введите ключ S3 для тестов">
+                            <span asp-validation-for="S3KeyAuthorSolution" class="text-danger"></span>
                         </div>
 
                         <!-- Выбор фреймворков -->
@@ -198,9 +206,9 @@
 
     // Инициализация выбранных фреймворков из ViewBag
     document.addEventListener('DOMContentLoaded', function () {
-        @if (ViewBag.SelectedFrameworks != null)
+        @if (Model.Frameworks != null)
         {
-            foreach (var framework in ViewBag.SelectedFrameworks)
+            foreach (var framework in Model.Frameworks)
             {
                 <text>
                     selectedFrameworks.push({

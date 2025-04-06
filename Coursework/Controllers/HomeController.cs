@@ -1,6 +1,8 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
 using Coursework.Models;
+using Coursework.Models.DTOs;
+using Coursework.Models.Entities;
 
 namespace Coursework.Controllers;
 

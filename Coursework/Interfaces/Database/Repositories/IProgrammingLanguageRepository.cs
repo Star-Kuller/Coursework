@@ -1,4 +1,5 @@
 using Coursework.Models;
+using Coursework.Models.Entities;
 
 namespace Coursework.Interfaces.Database.Repositories;
 

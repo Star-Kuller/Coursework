@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using Coursework.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace Coursework.Models;
+namespace Coursework.Models.Entities;
 
 public class Framework : Entity, IName
 {

@@ -1,4 +1,4 @@
-namespace Coursework.Models;
+namespace Coursework.Models.Entities;
 
 public class Entity
 {

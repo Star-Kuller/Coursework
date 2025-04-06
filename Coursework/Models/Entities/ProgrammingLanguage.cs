@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Coursework.Models.Interfaces;
 
-namespace Coursework.Models;
+namespace Coursework.Models.Entities;
 
 public class ProgrammingLanguage : Entity, IName
 {

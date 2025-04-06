@@ -1,4 +1,4 @@
-namespace Coursework.Models;
+namespace Coursework.Models.DTOs;
 
 public class ErrorViewModel
 {

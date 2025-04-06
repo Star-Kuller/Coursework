@@ -1,5 +1,6 @@
+using Coursework.Extensions;
 using Coursework.Interfaces.Database;
-using Coursework.Models;
+using Coursework.Models.DTOs;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.Controllers;
@@ -42,13 +43,12 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
 
         ViewBag.DifficultyLevels = difficultyLevels;
         ViewBag.Frameworks = frameworks;
-        ViewBag.SelectedFrameworks = exercise.Frameworks!;
         
-        return View(exercise);
+        return View(exercise.Map());
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(Exercise exercise, CancellationToken ct)
+    public async Task<IActionResult> Create(ExerciseDto exercise, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
 
@@ -59,12 +59,15 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
 
             ViewBag.DifficultyLevels = difficultyLevels;
             ViewBag.Frameworks = frameworks;
-            ViewBag.SelectedFrameworks = exercise.Frameworks!;
 
             return View(exercise);
         }
 
-        var id = await uow.Exercises.AddAsync(exercise);
+        var exerciseEntity = exercise.Map();
+        var id = await uow.Exercises.AddAsync(exerciseEntity);
+        var solution = exerciseEntity.AuthorSolution;
+        solution!.ExerciseId = id;
+        await uow.Solutions.AddAsync(solution);
         await uow.CommitAsync(ct);
 
         logger.LogInformation(
@@ -75,9 +78,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
     }
     
     [HttpPost]
-    public async Task<IActionResult> Update(Exercise exercise, CancellationToken ct)
+    public async Task<IActionResult> Update(ExerciseDto exercise, CancellationToken ct)
     {
-        ViewBag.SelectedFrameworks = exercise.Frameworks!;
         if (!ModelState.IsValid) return View(exercise);
         
         await using var uow = await uowFactory.CreateAsync(ct);
@@ -85,10 +87,14 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         if (prev is null)
             return NotFound();
         
+        var solution = prev.AuthorSolution;
+        solution!.S3Key = exercise.S3KeyAuthorSolution;
+        await uow.Solutions.UpdateAsync(solution);
+        
         if (prev.IsPublished)
             exercise.IsPublished = true;
         
-        await uow.Exercises.UpdateAsync(exercise);
+        await uow.Exercises.UpdateAsync(exercise.Map());
         await uow.CommitAsync(ct);
         
         logger.LogInformation(

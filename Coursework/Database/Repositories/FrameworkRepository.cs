@@ -1,6 +1,6 @@
 using System.Data;
 using Coursework.Interfaces.Database.Repositories;
-using Coursework.Models;
+using Coursework.Models.Entities;
 using Dapper;
 
 namespace Coursework.Database.Repositories;

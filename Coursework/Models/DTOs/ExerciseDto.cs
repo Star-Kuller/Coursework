@@ -1,11 +1,14 @@
 using System.ComponentModel.DataAnnotations;
+using Coursework.Models.Entities;
 using Coursework.Models.Interfaces;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace Coursework.Models;
+namespace Coursework.Models.DTOs;
 
-public class Exercise : Entity, IName
+public class ExerciseDto : IName
 {
+    public long Id { get; set; }
+    
     [Required(ErrorMessage = "Название упражнения обязательно для заполнения.")]
     [StringLength(50, ErrorMessage = "Название не должно превышать 50 символов.")]
     public string Name { get; set; }
@@ -32,7 +35,15 @@ public class Exercise : Entity, IName
     public string S3KeyTests { get; set; }
     
     [ValidateNever]
+    public long? AuthorSolutionId { get; set; }
+    
+    [Required(ErrorMessage = "Ключ S3 для тестов обязателен.")]
+    [StringLength(1024, ErrorMessage = "Ключ S3 для решения автора не должен превышать 1024 символа.")]
+    public string S3KeyAuthorSolution { get; set; }
+    
+    [ValidateNever]
     public DifficultyLevel? Difficulty { get; set; }
+    
     [ValidateNever]
     public IList<Framework>? Frameworks { get; set; }
 }

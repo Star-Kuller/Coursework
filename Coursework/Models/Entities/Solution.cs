@@ -1,0 +1,17 @@
+using System.ComponentModel.DataAnnotations;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
+
+namespace Coursework.Models.Entities;
+
+public class Solution : Entity
+{
+    [Required(ErrorMessage = "Ключ S3 обязателен.")]
+    [StringLength(1024, ErrorMessage = "Ключ S3 не должен превышать 1024 символа.")]
+    public string S3Key { get; set; }
+    
+    [ValidateNever]
+    public long ExerciseId { get; set; }
+    
+    [ValidateNever]
+    public bool ByExerciseAuthor { get; set; }
+}

@@ -1,5 +1,6 @@
 using Coursework.Interfaces.Database;
 using Coursework.Models;
+using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.Controllers;
@@ -57,7 +58,7 @@ public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogg
         await uow.CommitAsync(ct);
         
         logger.LogInformation(
-            "Обновлен язык программирования. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}", 
+            "Обновлен язык программирования. Id:{Id}, Название:{Name}, Описание:{Description}",
             language.Id, language.Name, language.Description);
         
         return RedirectToAction("Index");

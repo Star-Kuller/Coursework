@@ -8,6 +8,7 @@ public interface IUnitOfWork : IDisposable, IAsyncDisposable
     IFrameworkRepository Frameworks { get; }
     IDifficultyLevelRepository DifficultyLevels { get; }
     IExerciseRepository Exercises { get; }
+    ISolutionRepository Solutions { get; }
     
     Task CommitAsync(CancellationToken cancellationToken);
     Task RollBackAsync(CancellationToken cancellationToken);
