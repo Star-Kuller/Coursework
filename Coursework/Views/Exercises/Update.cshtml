@@ -42,16 +42,29 @@
                             <span asp-validation-for="Score" class="text-danger"></span>
                         </div>
 
+                        <!-- Язык программирования -->
+                        <div class="mb-3">
+                            <label for="LanguageId" class="form-label">Язык программирования</label>
+                            <select class="form-select rounded-pill" id="LanguageId" asp-for="LanguageId">
+                                <option value="">-- Выберите язык программирования --</option>
+                                @foreach (var language in ViewBag.Languages)
+                                {
+                                <option value="@language.Id" title="@language.Description">@language.Name</option>
+                                }
+                            </select>
+                            <span asp-validation-for="LanguageId" class="text-danger"></span>
+                        </div>
+
                         <!-- Краткое описание -->
                         <div class="mb-3">
-                            <label for="ShortDescription" class="form-label">Краткое описание</label>
+                            <label for="ShortDescription" class="form-label">Короткое описание</label>
                             <textarea class="form-control rounded" id="ShortDescription" asp-for="ShortDescription" rows="2" placeholder="Введите краткое описание"></textarea>
                             <span asp-validation-for="ShortDescription" class="text-danger"></span>
                         </div>
 
                         <!-- Полное описание -->
                         <div class="mb-3">
-                            <label for="FullDescription" class="form-label">Текст упражнения</label>
+                            <label for="FullDescription" class="form-label">Задание</label>
                             <textarea class="form-control rounded" id="FullDescription" asp-for="FullDescription" rows="4" placeholder="Введите текст упражнения и задание"></textarea>
                             <span asp-validation-for="FullDescription" class="text-danger"></span>
                         </div>

@@ -15,7 +15,11 @@ public class ExerciseDto : IName
 
     [Required(ErrorMessage = "Уровень сложности обязателен.")]
     public long DifficultyId { get; set; }
-
+    
+    [Required(ErrorMessage = "Язык программирования обязателен.")]
+    public long LanguageId { get; set; }
+    
+    
     [Range(1, long.MaxValue, ErrorMessage = "Количество баллов должно быть больше 0.")]
     [Required(ErrorMessage = "Количество очков обязательно.")]
     public long Score { get; set; }
@@ -32,7 +36,7 @@ public class ExerciseDto : IName
 
     [Required(ErrorMessage = "Ключ S3 для тестов обязателен.")]
     [StringLength(1024, ErrorMessage = "Ключ S3 для тестов не должен превышать 1024 символа.")]
-    public string S3KeyTests { get; set; }
+    public string? S3KeyTests { get; set; }
     
     [ValidateNever]
     public long? AuthorSolutionId { get; set; }
@@ -45,5 +49,11 @@ public class ExerciseDto : IName
     public DifficultyLevel? Difficulty { get; set; }
     
     [ValidateNever]
-    public IList<Framework>? Frameworks { get; set; }
+    public ProgrammingLanguage? Language { get; set; }
+
+    [ValidateNever] 
+    public IList<Solution> Solutions { get; set; } = new List<Solution>();
+    
+    [ValidateNever]
+    public IList<Framework> Frameworks { get; set; } = new List<Framework>();
 }

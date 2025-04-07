@@ -49,16 +49,27 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
     public async Task<Solution?> GetAsync(long id)
     {
         const string sql = """
-                           SELECT *
-                           FROM solutions
-                           WHERE id = @Id
+                           SELECT s.*, 
+                                  e.*
+                           FROM solutions s
+                           LEFT JOIN exercises e ON s.exercise_id = e.id
+                           WHERE s.id = @Id
                            LIMIT 1
                            """;
 
-        var result = await connection.QuerySingleOrDefaultAsync<Solution?>(
-            sql, new { Id = id }, transaction);
+        var result = await connection.QueryAsync<Solution, Exercise, Solution>(
+            sql,
+            (solution, exercise) =>
+            {
+                solution.Exercise = exercise;
+                return solution;
+            },
+            new { Id = id },
+            transaction,
+            splitOn: "id"
+        );
 
-        return result;
+        return result.FirstOrDefault();
     }
 
     public async Task<List<Solution>> GetAllAsync()

@@ -9,8 +9,11 @@ public class Solution : Entity
     [StringLength(1024, ErrorMessage = "Ключ S3 не должен превышать 1024 символа.")]
     public string S3Key { get; set; }
     
-    [ValidateNever]
+    [Required(ErrorMessage = "Id упражнения обязателено.")]
     public long ExerciseId { get; set; }
+    
+    [ValidateNever]
+    public Exercise? Exercise { get; set; }
     
     [ValidateNever]
     public bool ByExerciseAuthor { get; set; }

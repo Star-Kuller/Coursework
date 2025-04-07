@@ -1,11 +1,13 @@
 @model Coursework.Models.Entities.Solution
 
 @{
-    ViewData["Title"] = "Редактировать язык программирования";
+    ViewData["Title"] = $"Решение упражнения \"{Model.Exercise?.Name}\"";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Редактировать язык программирования</h1>
+<div class="container">
+    <div class="text-center">
+        <h1 class="display-4" style="word-wrap: break-word; overflow-wrap: break-word;">Редактировать решение для упражнения "@Model.Exercise?.Name"</h1>
+    </div>
 </div>
 
 <div class="container">
@@ -13,10 +15,16 @@
         <div class="col-md-6">
             <div class="card mt-5">
                 <div class="card-body">
-                    <form method="post" asp-controller="ProgrammingLanguages" asp-action="Update">
+                    <form method="post" asp-controller="Solution" asp-action="Update">
+                        <div class="mb-3">
+                            <label for="S3Key" class="form-label">Ключ S3 решения</label>
+                            <input type="text" class="form-control rounded-pill" id="S3Key" asp-for="S3Key" placeholder="Введите ключ S3 решения">
+                            <span asp-validation-for="S3Key" class="text-danger"></span>
+                        </div>
                         <div class="d-grid">
                             <button type="submit" class="btn btn-primary rounded-pill">Обновить</button>
                         </div>
+                        <input type="hidden" asp-for="ExerciseId" value="@Model.Exercise?.Id">
                     </form>
                 </div>
             </div>

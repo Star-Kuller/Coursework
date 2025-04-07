@@ -4,14 +4,108 @@
     ViewData["Title"] = $"Упражнение {Model.Name}";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Упражнение @Model.Name</h1>
-</div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h1 class="card-title text-center">@Model.Name</h1>
+                </div>
+                <div class="card-body">
+                    <!-- Основные параметры -->
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">
+                            <strong>Сложность:</strong> @Model.Difficulty?.Name
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Очки:</strong> @Model.Score
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Язык программирования:</strong> @Model.Language?.Name
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Фреймворки:</strong> @string.Join(", ", Model.Frameworks.Select(f => f.Name))
+                        </li>
+                        <li class="list-group-item">
+                            <strong>Автор:</strong> Имя автора
+                        </li>
+                    </ul>
 
-<div class="container">
-    <div class="row">
-        <div class="col-12">
-            
+                    <!-- Короткое описание -->
+                    <div class="mt-4">
+                        <h5 class="text-muted">Описание:</h5>
+                        <p>@Model.ShortDescription</p>
+                    </div>
+
+                    <!-- Полное описание -->
+                    <div class="mt-4">
+                        <h5 class="text-muted">Задание:</h5>
+                        <p style="white-space: pre-wrap;">@Model.FullDescription</p>
+                    </div>
+
+                    <!-- Полное описание -->
+                    <div class="mt-4">
+                        <h5 class="text-muted">Подсказки:</h5>
+                        <p>Тут будет аккордеон</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-1">
+                <div class="card-body d-flex justify-content-between flex-row">
+                    <h4>Решение автора</h4>
+                    <a class="btn btn-primary btn rounded-pill"
+                       asp-controller="Solution"
+                       asp-action="View"
+                       asp-route-id="@Model.AuthorSolutionId">Посмотреть</a>
+                </div>
+            </div>
+            <div class="card mt-1">
+                <div class="card-header">
+                    <h4 class="card-title text-center">Решения</h4>
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th scope="col">Автор</th>
+                        <th scope="col" class="text-end">
+                            <a class="btn btn-primary btn-sm rounded-pill"
+                               asp-controller="Solution"
+                               asp-action="Create"
+                               asp-route-id="@Model.Id">Загрузить решение</a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                    @foreach (var solution in Model.Solutions)
+                    {
+                        <tr>
+                            <td>
+                                Имя автора
+                            </td>
+                            <td class="text-end">
+                                <form method="post"
+                                      asp-controller="Solution"
+                                      asp-action="Delete"
+                                      asp-route-id="@solution.Id"
+                                      onsubmit="return confirm('Вы уверены, что хотите удалить этот упражнение?');">
+                                    <div class="btn-group rounded-pill">
+                                        <a class="btn btn-sm btn-primary"
+                                           asp-controller="Solution"
+                                           asp-action="View"
+                                           asp-route-id="@solution.Id">Посмотреть</a>
+                                        <a class="btn btn-sm btn-secondary"
+                                           asp-controller="Solution"
+                                           asp-action="Update"
+                                           asp-route-id="@solution.Id">Редактировать</a>
+                                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                    </div>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>

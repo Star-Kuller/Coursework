@@ -6,6 +6,7 @@ public class Exercise : Entity, IName
     public string Name { get; set; }
     
     public long DifficultyId { get; set; }
+    public long LanguageId { get; set; }
     
     public long Score { get; set; }
     
@@ -19,7 +20,9 @@ public class Exercise : Entity, IName
     public string S3KeyTests { get; set; }
     
     public DifficultyLevel? Difficulty { get; set; }
+    public ProgrammingLanguage? Language { get; set; }
     
     public Solution? AuthorSolution { get; set; }
-    public IList<Framework>? Frameworks { get; set; }
+    public IList<Framework> Frameworks { get; set; } = new List<Framework>();
+    public IList<Solution> Solutions { get; set; } = new List<Solution>();
 }

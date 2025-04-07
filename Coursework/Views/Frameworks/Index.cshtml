@@ -22,8 +22,7 @@
             <th scope="col">Id</th>
             <th scope="col">Название</th>
             <th scope="col">Язык программирования</th>
-            <th style="width: 1%;" scope="col"></th>
-            <th style="width: 1%;" scope="col"></th>
+            <th scope="col" class="text-end"></th>
         </tr>
         </thead>
         <tbody class="table-group-divider">
@@ -33,21 +32,20 @@
                 <th scope="row">@framework.Id</th>
                 <td>@framework.Name</td>
                 <td>@framework.Language.Name</td>
-                <td>
-                    <a class="btn btn-secondary btn-sm rounded-pill"
-                       asp-controller="Frameworks"
-                       asp-action="Update" 
-                       asp-route-id="@framework.Id">Редактировать</a>
-                </td>
-                <td>
-                    <form 
-                        method="post" 
-                        asp-controller="Frameworks" 
-                        asp-action="Delete" 
+                <td class="text-end">
+                    <form
+                        method="post"
+                        asp-controller="Frameworks"
+                        asp-action="Delete"
                         asp-route-id="@framework.Id"
-                        onsubmit="return confirm('Вы уверены, что хотите удалить этот фреймворк?');"
-                        >
-                        <button type="submit" class="btn btn-danger btn-sm rounded-pill">Удалить</button>
+                        onsubmit="return confirm('Вы уверены, что хотите удалить этот фреймворк?');">
+                        <div class="btn-group rounded-pill">
+                            <a class="btn btn-sm btn-secondary"
+                               asp-controller="Frameworks"
+                               asp-action="Update"
+                               asp-route-id="@framework.Id">Редактировать</a>
+                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                        </div>
                     </form>
                 </td>
             </tr>

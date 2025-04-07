@@ -11,8 +11,15 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         return View();
     }
     
-    public IActionResult Create()
+    public async Task<IActionResult> Create(long id, CancellationToken ct)
     {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var exercise = await uow.Exercises.GetAsync(id);
+        if (exercise is null)
+            return NotFound();
+
+        ViewBag.Exercise = exercise;
+
         return View();
     }
     
@@ -26,6 +33,15 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         return View(solution);
     }
     
+    public async Task<IActionResult> View(long id, CancellationToken ct)
+    {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var solution = await uow.Solutions.GetAsync(id);
+        if (solution is null)
+            return NotFound();
+        
+        return View(solution);
+    }
     
     [HttpPost]
     public async Task<IActionResult> Create(Solution solution, CancellationToken ct)
@@ -40,7 +56,7 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
             "Добавлено решение. Id:{Id}, Id упражнения:{ExerciseId}", 
             solution.Id, solution.ExerciseId);
         
-        return RedirectToAction("Index");
+        return RedirectToAction("View", "Exercises", new { Id = solution.ExerciseId });
     }
     
     [HttpPost]
@@ -56,18 +72,22 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
             "Обновлено решение. Id:{Id}, Id упражнения:{ExerciseId}", 
             solution.Id, solution.ExerciseId);
         
-        return RedirectToAction("Index");
+        return RedirectToAction("View", "Exercises", new { Id = solution.ExerciseId });
     }
     
     [HttpPost]
     public async Task<IActionResult> Delete(long id, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
+        var solution = await uow.Solutions.GetAsync(id);
+        if (solution is null)
+            return NotFound();
+        
         await uow.Solutions.DeleteAsync(id);
         await uow.CommitAsync(ct);
         
         logger.LogInformation("Удалено решение. Id:{Id}", id);
         
-        return RedirectToAction("Index");
+        return RedirectToAction("View", "Exercises", new { Id = solution.ExerciseId });
     }
 }

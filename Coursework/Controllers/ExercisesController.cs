@@ -23,9 +23,11 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         await using var uow = await uowFactory.CreateAsync(ct);
         
         var difficultyLevels = await uow.DifficultyLevels.GetAllAsync();
+        var languages = await uow.Languages.GetAllAsync();
         var frameworks = await uow.Frameworks.GetAllAsync();
 
         ViewBag.DifficultyLevels = difficultyLevels;
+        ViewBag.Languages = languages;
         ViewBag.Frameworks = frameworks;
 
         return View();
@@ -39,10 +41,22 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
             return NotFound();
         
         var difficultyLevels = await uow.DifficultyLevels.GetAllAsync();
+        var languages = await uow.Languages.GetAllAsync();
         var frameworks = await uow.Frameworks.GetAllAsync();
 
         ViewBag.DifficultyLevels = difficultyLevels;
+        ViewBag.Languages = languages;
         ViewBag.Frameworks = frameworks;
+        
+        return View(exercise.Map());
+    }
+
+    public async Task<IActionResult> View(long id, CancellationToken ct)
+    {
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var exercise = await uow.Exercises.GetWithSolutionsAsync(id);
+        if (exercise is null)
+            return NotFound();
         
         return View(exercise.Map());
     }
@@ -55,16 +69,18 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         if (!ModelState.IsValid)
         {
             var difficultyLevels = await uow.DifficultyLevels.GetAllAsync();
+            var languages = await uow.Languages.GetAllAsync();
             var frameworks = await uow.Frameworks.GetAllAsync();
 
             ViewBag.DifficultyLevels = difficultyLevels;
+            ViewBag.Languages = languages;
             ViewBag.Frameworks = frameworks;
 
             return View(exercise);
         }
 
         var exerciseEntity = exercise.Map();
-        var id = await uow.Exercises.AddAsync(exerciseEntity);
+        var id = await uow.Exercises.AddAsync(exerciseEntity); 
         var solution = exerciseEntity.AuthorSolution;
         solution!.ExerciseId = id;
         await uow.Solutions.AddAsync(solution);
@@ -80,9 +96,21 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
     [HttpPost]
     public async Task<IActionResult> Update(ExerciseDto exercise, CancellationToken ct)
     {
-        if (!ModelState.IsValid) return View(exercise);
-        
         await using var uow = await uowFactory.CreateAsync(ct);
+        
+        if (!ModelState.IsValid)
+        {
+            var difficultyLevels = await uow.DifficultyLevels.GetAllAsync();
+            var languages = await uow.Languages.GetAllAsync();
+            var frameworks = await uow.Frameworks.GetAllAsync();
+
+            ViewBag.DifficultyLevels = difficultyLevels;
+            ViewBag.Languages = languages;
+            ViewBag.Frameworks = frameworks;
+
+            return View(exercise);
+        }
+        
         var prev = await uow.Exercises.GetAsync(exercise.Id);
         if (prev is null)
             return NotFound();

@@ -12,13 +12,14 @@ public static class ExerciseExtensions
             Id = exerciseDto.Id,
             Name = exerciseDto.Name,
             DifficultyId = exerciseDto.DifficultyId,
+            LanguageId = exerciseDto.LanguageId,
             Score = exerciseDto.Score,
             ShortDescription = exerciseDto.ShortDescription,
             FullDescription = exerciseDto.FullDescription,
             IsPublished = exerciseDto.IsPublished,
             S3KeySource = exerciseDto.S3KeySource,
-            S3KeyTests = exerciseDto.S3KeyTests,
-            Frameworks = exerciseDto.Frameworks,
+            S3KeyTests = exerciseDto.S3KeyTests!,
+            Frameworks = exerciseDto.Frameworks!,
             AuthorSolution = new Solution
             {
                 ExerciseId = exerciseDto.Id,
@@ -35,6 +36,9 @@ public static class ExerciseExtensions
             Id = exercise.Id,
             Name = exercise.Name,
             DifficultyId = exercise.DifficultyId,
+            Difficulty = exercise.Difficulty,
+            LanguageId = exercise.LanguageId,
+            Language = exercise.Language,
             Score = exercise.Score,
             ShortDescription = exercise.ShortDescription,
             FullDescription = exercise.FullDescription,
@@ -43,7 +47,8 @@ public static class ExerciseExtensions
             S3KeyTests = exercise.S3KeyTests,
             Frameworks = exercise.Frameworks,
             AuthorSolutionId = exercise.AuthorSolution?.Id,
-            S3KeyAuthorSolution = exercise.AuthorSolution!.S3Key
+            S3KeyAuthorSolution = exercise.AuthorSolution?.S3Key!,
+            Solutions = exercise.Solutions
         };
     }
 }
