@@ -20,12 +20,7 @@ public static class ExerciseExtensions
             S3KeySource = exerciseDto.S3KeySource,
             S3KeyTests = exerciseDto.S3KeyTests!,
             Frameworks = exerciseDto.Frameworks!,
-            AuthorSolution = new Solution
-            {
-                ExerciseId = exerciseDto.Id,
-                S3Key = exerciseDto.S3KeyAuthorSolution,
-                ByExerciseAuthor = true
-            }
+            Hints = exerciseDto.Hints?.ToList() ?? new List<Hint>()
         };
     }
     
@@ -46,9 +41,7 @@ public static class ExerciseExtensions
             S3KeySource = exercise.S3KeySource,
             S3KeyTests = exercise.S3KeyTests,
             Frameworks = exercise.Frameworks,
-            AuthorSolutionId = exercise.AuthorSolution?.Id,
-            S3KeyAuthorSolution = exercise.AuthorSolution?.S3Key!,
-            Solutions = exercise.Solutions
+            Hints = exercise.Hints?.ToList() ?? new List<Hint>()
         };
     }
 }

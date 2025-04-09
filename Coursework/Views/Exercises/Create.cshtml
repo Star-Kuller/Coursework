@@ -110,6 +110,16 @@
                             <!-- Фреймворки будут добавляться сюда -->
                         </div>
 
+                        <!-- Добавление подсказок -->
+                        <div class="mb-3 d-flex justify-content-center">
+                            <button type="button" class="btn btn-primary btn-sm rounded-pill" onclick="addHintButton()">Добавить подсказку</button>
+                        </div>
+
+                        <!-- Список добавленных подсказок -->
+                        <div id="hintsContainer" class="mt-2">
+                            <!-- Подсказки будут добавляться сюда -->
+                        </div>
+
                         <!-- Кнопки сохранения -->
                         <div class="d-flex gap-2 mt-4">
                             <button type="submit" class="btn btn-secondary rounded-pill flex-grow-1" onclick="setIsPublished(false)">Сохранить</button>
@@ -131,6 +141,45 @@
     <script>
     // Массив для хранения выбранных фреймворков
     let selectedFrameworks = [];
+    // Массив для хранения подсказок
+    let hints = [];
+
+    // Добавление подсказки
+    function addHintButton() {
+        const hintId = Date.now(); // Уникальный ID для подсказки
+        const hintDiv = document.createElement('div');
+        hintDiv.className = 'card mb-3';
+        hintDiv.id = `hint-${hintId}`;
+        hintDiv.innerHTML = `
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="form-label">Стоимость подсказки (очки)</label>
+                    <input type="number" class="form-control rounded-pill hint-cost" 
+                           min="1" required placeholder="Введите стоимость подсказки">
+                    <div class="invalid-feedback">Укажите положительное число очков</div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Текст подсказки</label>
+                    <textarea class="form-control rounded hint-text" rows="3" 
+                              required placeholder="Введите текст подсказки"></textarea>
+                    <div class="invalid-feedback">Текст подсказки обязателен</div>
+                </div>
+                <button type="button" class="btn btn-danger btn-sm rounded-pill ms-auto" 
+                        onclick="removeHint(${hintId})">Убрать</button>
+            </div>
+        `;
+        document.getElementById('hintsContainer').appendChild(hintDiv);
+        hints.push({ id: hintId });
+    }
+
+    // Удаление подсказки
+    function removeHint(id) {
+        const hintElement = document.getElementById(`hint-${id}`);
+        if (hintElement) {
+            hintElement.remove();
+        }
+        hints = hints.filter(h => h.id !== id);
+    }
 
     // Добавление фреймворка в массив
     function addFrameworkButton() {

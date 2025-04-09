@@ -94,59 +94,6 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     public async Task<Exercise?> GetAsync(long id)
     {
         const string sql = """
-            SELECT e.*,
-                   d.*,
-                   l.*,
-                   s.*
-            FROM exercises e
-            LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
-            LEFT JOIN programing_languages l ON e.language_id = l.id
-            LEFT JOIN (
-                SELECT *
-                FROM solutions
-                WHERE by_exercise_author = TRUE
-            ) s ON e.id = s.exercise_id
-            WHERE e.id = @Id
-            LIMIT 1
-            """;
-
-        const string frameworksSql = """
-            SELECT f.*
-            FROM frameworks f
-            INNER JOIN frameworks_exercises fe ON f.id = fe.framework_id
-            WHERE fe.exercise_id = @ExerciseId
-            """;
-
-        var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, Solution, Exercise>(
-            sql,
-            (exercise, difficulty, language, solution) =>
-            {
-                exercise.Difficulty = difficulty;
-                exercise.Language = language;
-                exercise.AuthorSolution = solution;
-                return exercise;
-            },
-            new { Id = id },
-            transaction,
-            splitOn: "id"
-        );
-
-        var result = exercise.FirstOrDefault();
-        if (result != null)
-        {
-            result.Frameworks = (await connection.QueryAsync<Framework>(
-                frameworksSql,
-                new { ExerciseId = id },
-                transaction
-            )).ToList();
-        }
-
-        return result;
-    }
-    
-    public async Task<Exercise?> GetWithSolutionsAsync(long id)
-    {
-        const string sql = """
                            SELECT e.*,
                                   d.*,
                                   l.*,
@@ -157,14 +104,21 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                            LEFT JOIN solutions s ON e.id = s.exercise_id
                            WHERE e.id = @Id
                            """;
-
+    
         const string frameworksSql = """
                                      SELECT f.*
                                      FROM frameworks f
                                      INNER JOIN frameworks_exercises fe ON f.id = fe.framework_id
                                      WHERE fe.exercise_id = @ExerciseId
                                      """;
-
+    
+        const string hintsSql = """
+                                     SELECT h.*
+                                     FROM hints h
+                                     WHERE h.exercise_id = @ExerciseId
+                                     ORDER BY h.cost
+                                     """;
+    
         var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, Solution, Exercise>(
             sql,
             (exercise, difficulty, language, solution) =>
@@ -178,7 +132,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             transaction,
             splitOn: "id"
         );
-
+    
         var result = exercise.GroupBy(e => e.Id).Select(g =>
         {
             var ex = g.First();
@@ -191,15 +145,20 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                 .ToList();
             return ex;
         }).FirstOrDefault();
+
+        if (result == null) return result;
         
-        if (result != null)
-        {
-            result.Frameworks = (await connection.QueryAsync<Framework>(
-                frameworksSql,
-                new { ExerciseId = id },
-                transaction
-            )).ToList();
-        }
+        result.Frameworks = (await connection.QueryAsync<Framework>(
+            frameworksSql,
+            new { ExerciseId = id },
+            transaction
+        )).ToList();
+    
+        result.Hints = (await connection.QueryAsync<Hint>(
+            hintsSql,
+            new { ExerciseId = id },
+            transaction
+        )).ToList();
 
         return result;
     }

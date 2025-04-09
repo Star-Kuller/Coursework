@@ -51,3 +51,25 @@ body {
   border-top-right-radius: 50rem;
   border-bottom-right-radius: 50rem;
 }
+
+
+/* Стили для аккордеона подсказок */
+#hintsAccordion .accordion-button:not(.collapsed) {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+#hintsAccordion .accordion-button:focus {
+    box-shadow: none;
+    border-color: rgba(0,0,0,.125);
+}
+
+#hintsAccordion .accordion-item {
+    margin-bottom: 0.5rem;
+    border-radius: 0.375rem;
+    overflow: hidden;
+}
+
+#hintsAccordion .accordion-body {
+    white-space: pre-wrap;
+}

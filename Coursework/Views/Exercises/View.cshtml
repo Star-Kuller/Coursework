@@ -42,11 +42,32 @@
                         <h5 class="text-muted">Задание:</h5>
                         <p style="white-space: pre-wrap;">@Model.FullDescription</p>
                     </div>
-
-                    <!-- Полное описание -->
+                    
+                    <!-- Подсказки -->
                     <div class="mt-4">
                         <h5 class="text-muted">Подсказки:</h5>
-                        <p>Тут будет аккордеон</p>
+                        <div class="accordion" id="hintsAccordion">
+                            @foreach (var hint in Model.Hints)
+                            {
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading-@hint.Id">
+                                    <button class="accordion-button collapsed"
+                                            type="button"
+                                            data-bs-toggle="collapse"
+                                            data-bs-target="#collapse-@hint.Id"
+                                            aria-expanded="false"
+                                            aria-controls="collapse-@hint.Id">
+                                        Подсказка за @hint.Cost очков
+                                    </button>
+                                </h2>
+                                <div id="collapse-@hint.Id"
+                                     class="accordion-collapse collapse"
+                                     aria-labelledby="heading-@hint.Id">
+                                    <div class="accordion-body">@hint.Text</div>
+                                </div>
+                            </div>
+                            }
+                        </div>
                     </div>
                 </div>
             </div>

@@ -25,4 +25,6 @@ public class Exercise : Entity, IName
     public Solution? AuthorSolution { get; set; }
     public IList<Framework> Frameworks { get; set; } = new List<Framework>();
     public IList<Solution> Solutions { get; set; } = new List<Solution>();
+    
+    public IList<Hint> Hints { get; set; } = new List<Hint>();
 }

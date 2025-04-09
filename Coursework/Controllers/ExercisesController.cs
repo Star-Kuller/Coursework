@@ -1,6 +1,7 @@
 using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models.DTOs;
+using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Coursework.Controllers;
@@ -54,7 +55,7 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
     public async Task<IActionResult> View(long id, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
-        var exercise = await uow.Exercises.GetWithSolutionsAsync(id);
+        var exercise = await uow.Exercises.GetAsync(id);
         if (exercise is null)
             return NotFound();
         
@@ -80,7 +81,20 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         }
 
         var exerciseEntity = exercise.Map();
-        var id = await uow.Exercises.AddAsync(exerciseEntity); 
+        var id = await uow.Exercises.AddAsync(exerciseEntity);
+        
+        // Добавление подсказок
+        foreach (var hintDto in exercise.Hints)
+        {
+            var hint = new Hint
+            {
+                ExerciseId = id,
+                Cost = hintDto.Cost,
+                Text = hintDto.Text
+            };
+            await uow.Hints.AddAsync(hint);
+        }
+        
         var solution = exerciseEntity.AuthorSolution;
         solution!.ExerciseId = id;
         await uow.Solutions.AddAsync(solution);
@@ -122,6 +136,7 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         if (prev.IsPublished)
             exercise.IsPublished = true;
         
+        // Обновление упражнения
         await uow.Exercises.UpdateAsync(exercise.Map());
         await uow.CommitAsync(ct);
         

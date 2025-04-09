@@ -56,4 +56,7 @@ public class ExerciseDto : IName
     
     [ValidateNever]
     public IList<Framework> Frameworks { get; set; } = new List<Framework>();
+
+    [ValidateNever]
+    public IList<Hint> Hints { get; set; } = new List<Hint>();
 }
