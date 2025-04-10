@@ -82,19 +82,6 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
 
         var exerciseEntity = exercise.Map();
         var id = await uow.Exercises.AddAsync(exerciseEntity);
-        
-        // Добавление подсказок
-        foreach (var hintDto in exercise.Hints)
-        {
-            var hint = new Hint
-            {
-                ExerciseId = id,
-                Cost = hintDto.Cost,
-                Text = hintDto.Text
-            };
-            await uow.Hints.AddAsync(hint);
-        }
-        
         var solution = exerciseEntity.AuthorSolution;
         solution!.ExerciseId = id;
         await uow.Solutions.AddAsync(solution);

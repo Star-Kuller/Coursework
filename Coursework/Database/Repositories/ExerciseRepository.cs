@@ -28,7 +28,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         var exerciseId = await connection.QuerySingleOrDefaultAsync<long>(
             insertExerciseSql, exercise, transaction);
 
-        if (exercise.Frameworks == null || !exercise.Frameworks.Any()) return exerciseId;
+        if (!exercise.Frameworks.Any()) return exerciseId;
         
         const string insertFrameworksSql = """
                                            INSERT INTO frameworks_exercises (framework_id, exercise_id)
@@ -40,6 +40,18 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             .Select(f => new { FrameworkId = f.Id, ExerciseId = exerciseId });
 
         await connection.ExecuteAsync(insertFrameworksSql, frameworkParams, transaction);
+        
+        if (!exercise.Hints.Any()) return exerciseId;
+        
+        foreach (var hint in exercise.Hints)
+            hint.ExerciseId = exerciseId;
+        
+        const string insertHintsSql = """
+                                           INSERT INTO hints (exercise_id, cost, text)
+                                           VALUES (@ExerciseId, @Cost, @Text)
+                                           """;
+
+        await connection.ExecuteAsync(insertHintsSql, exercise.Hints, transaction);
 
         return exerciseId;
     }
@@ -63,8 +75,15 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             DELETE FROM frameworks_exercises
             WHERE exercise_id = @ExerciseId
             """;
+        
+        const string deleteHintsSql = """
+            DELETE FROM hints
+            WHERE exercise_id = @ExerciseId
+            """;
 
         await connection.ExecuteAsync(deleteFrameworksSql, new { ExerciseId = exercise.Id }, transaction);
+        await connection.ExecuteAsync(deleteHintsSql, new { ExerciseId = exercise.Id }, transaction);
+
         
         if (exercise.Frameworks.Any())
         {
@@ -78,6 +97,19 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                 .Select(f => new { FrameworkId = f.Id, ExerciseId = exercise.Id });
 
             await connection.ExecuteAsync(insertFrameworksSql, frameworkParams, transaction);
+        }
+        
+        if (exercise.Hints.Any())
+        {
+            foreach (var hint in exercise.Hints)
+                hint.ExerciseId = exercise.Id;
+        
+            const string insertHintsSql = """
+                                          INSERT INTO hints (exercise_id, cost, text)
+                                          VALUES (@ExerciseId, @Cost, @Text)
+                                          """;
+
+            await connection.ExecuteAsync(insertHintsSql, exercise.Hints, transaction);
         }
     }
 

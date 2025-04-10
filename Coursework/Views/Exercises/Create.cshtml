@@ -111,12 +111,23 @@
                         </div>
 
                         <!-- Добавление подсказок -->
-                        <div class="mb-3 d-flex justify-content-center">
-                            <button type="button" class="btn btn-primary btn-sm rounded-pill" onclick="addHintButton()">Добавить подсказку</button>
+                        <div class="mb-3">
+                            <div class="card p-3">
+                                <h5 class="card-title">Добавить подсказку</h5>
+                                <div class="mb-3">
+                                    <label for="HintCost" class="form-label">Очки</label>
+                                    <input type="number" class="form-control rounded-pill" id="HintCost" placeholder="Введите стоимость подсказки">
+                                </div>
+                                <div class="mb-3">
+                                    <label for="HintText" class="form-label">Текст подсказки</label>
+                                    <textarea class="form-control rounded" id="HintText" rows="2" placeholder="Введите текст подсказки"></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary rounded-pill" onclick="addHintButton()">Добавить подсказку</button>
+                            </div>
                         </div>
 
                         <!-- Список добавленных подсказок -->
-                        <div id="hintsContainer" class="mt-2">
+                        <div id="hints" class="mt-2">
                             <!-- Подсказки будут добавляться сюда -->
                         </div>
 
@@ -139,49 +150,9 @@
     <partial name="_ValidationScriptsPartial"/>
 
     <script>
-    // Массив для хранения выбранных фреймворков
     let selectedFrameworks = [];
-    // Массив для хранения подсказок
     let hints = [];
-
-    // Добавление подсказки
-    function addHintButton() {
-        const hintId = Date.now(); // Уникальный ID для подсказки
-        const hintDiv = document.createElement('div');
-        hintDiv.className = 'card mb-3';
-        hintDiv.id = `hint-${hintId}`;
-        hintDiv.innerHTML = `
-            <div class="card-body">
-                <div class="mb-3">
-                    <label class="form-label">Стоимость подсказки (очки)</label>
-                    <input type="number" class="form-control rounded-pill hint-cost" 
-                           min="1" required placeholder="Введите стоимость подсказки">
-                    <div class="invalid-feedback">Укажите положительное число очков</div>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Текст подсказки</label>
-                    <textarea class="form-control rounded hint-text" rows="3" 
-                              required placeholder="Введите текст подсказки"></textarea>
-                    <div class="invalid-feedback">Текст подсказки обязателен</div>
-                </div>
-                <button type="button" class="btn btn-danger btn-sm rounded-pill ms-auto" 
-                        onclick="removeHint(${hintId})">Убрать</button>
-            </div>
-        `;
-        document.getElementById('hintsContainer').appendChild(hintDiv);
-        hints.push({ id: hintId });
-    }
-
-    // Удаление подсказки
-    function removeHint(id) {
-        const hintElement = document.getElementById(`hint-${id}`);
-        if (hintElement) {
-            hintElement.remove();
-        }
-        hints = hints.filter(h => h.id !== id);
-    }
-
-    // Добавление фреймворка в массив
+    
     function addFrameworkButton() {
         const select = document.getElementById('FrameworkId');
         const selectedOption = select.options[select.selectedIndex];
@@ -204,7 +175,6 @@
         renderSelectedFrameworks();
     }
 
-    // Отображение списка выбранных фреймворков
     function renderSelectedFrameworks() {
         const container = document.getElementById('selectedFrameworks');
         container.innerHTML = '';
@@ -230,13 +200,76 @@
         });
     }
 
-    // Удаление фреймворка из массива
     function removeFramework(index) {
         selectedFrameworks.splice(index, 1);
         renderSelectedFrameworks();
     }
 
-    // Установка значения IsPublished
+    function addHintButton() {
+        const cost = document.getElementById('HintCost').value;
+        const text = document.getElementById('HintText').value;
+
+        if (!cost || !text) {
+            alert('Пожалуйста, заполните все поля подсказки!');
+            return;
+        }
+
+        if (hints.some(h => h.text === text)) {
+            alert('Такая подсказка уже добавлена!');
+            return;
+        }
+
+        const hint = {
+            cost: cost,
+            text: text
+        };
+
+        hints.push(hint);
+        renderHints();
+        
+        document.getElementById('HintCost').value = '';
+        document.getElementById('HintText').value = '';
+    }
+
+    function renderHints() {
+        const container = document.getElementById('hints');
+        container.innerHTML = '';
+
+        hints.forEach((hint, index) => {
+            const card = document.createElement('div');
+            card.className = 'card mb-3';
+            
+            const cardHeader = document.createElement('div');
+            cardHeader.className = 'card-header d-flex justify-content-between align-items-center';
+            cardHeader.innerHTML = `<strong>Подсказка за ${hint.cost} очков</strong>`;
+            
+            const removeButton = document.createElement('button');
+            removeButton.type = 'button';
+            removeButton.className = 'btn btn-sm btn-danger';
+            removeButton.textContent = 'Убрать';
+            removeButton.onclick = () => removeHint(index);
+            cardHeader.appendChild(removeButton);
+            
+            const cardBody = document.createElement('div');
+            cardBody.className = 'card-body';
+            
+            const hintText = document.createElement('p');
+            hintText.className = 'card-text';
+            hintText.textContent = hint.text;
+            
+            cardBody.appendChild(hintText);
+            card.appendChild(cardHeader);
+            card.appendChild(cardBody);
+            
+            container.appendChild(card);
+        });
+    }
+    
+    function removeHint(index) {
+        hints.splice(index, 1);
+        renderHints();
+    }
+    
     function setIsPublished(value) {
         document.getElementById('IsPublished').value = value;
     }
@@ -245,11 +278,10 @@
     document.getElementById('exerciseForm').addEventListener('submit', function () {
         const form = this;
 
-        // Очистка старых скрытых инпутов
-        const oldInputs = form.querySelectorAll('input[name^="Frameworks"]');
-        oldInputs.forEach(input => input.remove());
-
-        // Создание новых скрытых инпутов
+        const oldFrameworkInputs = form.querySelectorAll('input[name^="Frameworks"]');
+        const oldHintInputs = form.querySelectorAll('input[name^="Hints"]');
+        [...oldFrameworkInputs, ...oldHintInputs].forEach(input => input.remove());
+        
         selectedFrameworks.forEach((framework, index) => {
             const idInput = document.createElement('input');
             idInput.type = 'hidden';
@@ -263,6 +295,21 @@
 
             form.appendChild(idInput);
             form.appendChild(nameInput);
+        });
+
+        hints.forEach((hint, index) => {
+            const scoreInput = document.createElement('input');
+            scoreInput.type = 'hidden';
+            scoreInput.name = `Hints[${index}].Cost`;
+            scoreInput.value = hint.cost;
+
+            const textInput = document.createElement('input');
+            textInput.type = 'hidden';
+            textInput.name = `Hints[${index}].Text`;
+            textInput.value = hint.text;
+
+            form.appendChild(scoreInput);
+            form.appendChild(textInput);
         });
     });
 

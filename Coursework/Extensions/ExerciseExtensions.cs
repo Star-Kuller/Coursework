@@ -19,8 +19,15 @@ public static class ExerciseExtensions
             IsPublished = exerciseDto.IsPublished,
             S3KeySource = exerciseDto.S3KeySource,
             S3KeyTests = exerciseDto.S3KeyTests!,
-            Frameworks = exerciseDto.Frameworks!,
-            Hints = exerciseDto.Hints?.ToList() ?? new List<Hint>()
+            Frameworks = exerciseDto.Frameworks,
+            AuthorSolution = new Solution
+            {
+                Id = exerciseDto.AuthorSolutionId,
+                S3Key = exerciseDto.S3KeyAuthorSolution,
+                ExerciseId = exerciseDto.Id,
+                ByExerciseAuthor = true
+            },
+            Hints = exerciseDto.Hints.ToList()
         };
     }
     
@@ -41,7 +48,10 @@ public static class ExerciseExtensions
             S3KeySource = exercise.S3KeySource,
             S3KeyTests = exercise.S3KeyTests,
             Frameworks = exercise.Frameworks,
-            Hints = exercise.Hints?.ToList() ?? new List<Hint>()
+            AuthorSolutionId = exercise.AuthorSolution?.Id ?? default,
+            S3KeyAuthorSolution = exercise.AuthorSolution?.S3Key!,
+            Solutions = exercise.Solutions,
+            Hints = exercise.Hints.ToList()
         };
     }
 }

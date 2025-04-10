@@ -39,7 +39,7 @@ public class ExerciseDto : IName
     public string? S3KeyTests { get; set; }
     
     [ValidateNever]
-    public long? AuthorSolutionId { get; set; }
+    public long AuthorSolutionId { get; set; }
     
     [Required(ErrorMessage = "Ключ S3 для тестов обязателен.")]
     [StringLength(1024, ErrorMessage = "Ключ S3 для решения автора не должен превышать 1024 символа.")]
