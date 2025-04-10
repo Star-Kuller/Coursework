@@ -22,6 +22,9 @@ public class Exercise : Entity, IName
     public DifficultyLevel? Difficulty { get; set; }
     public ProgrammingLanguage? Language { get; set; }
     
+    public long AuthorId { get; set; }
+    public User? Author { get; set; }
+    
     public Solution? AuthorSolution { get; set; }
     public IList<Framework> Frameworks { get; set; } = new List<Framework>();
     public IList<Solution> Solutions { get; set; } = new List<Solution>();

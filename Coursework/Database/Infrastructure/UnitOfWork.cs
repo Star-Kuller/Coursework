@@ -14,6 +14,8 @@ public class UnitOfWork(NpgsqlConnection connection, NpgsqlTransaction transacti
     public IDifficultyLevelRepository DifficultyLevels => new DifficultyLevelRepository(connection, transaction);
     public IExerciseRepository Exercises => new ExerciseRepository(connection, transaction);
     public ISolutionRepository Solutions => new SolutionRepository(connection, transaction);
+    public IUserRepository Users => new UserRepository(connection, transaction);
+    public IRoleRepository Roles => new RoleRepository(connection, transaction);
 
     public async Task CommitAsync(CancellationToken token)
     {

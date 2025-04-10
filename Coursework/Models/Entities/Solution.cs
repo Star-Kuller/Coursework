@@ -12,9 +12,12 @@ public class Solution : Entity
     [Required(ErrorMessage = "Id упражнения обязателено.")]
     public long ExerciseId { get; set; }
     
+    [Required(ErrorMessage = "Id владельца обязателен.")]
+    public long AuthorId { get; set; }
+    
     [ValidateNever]
     public Exercise? Exercise { get; set; }
     
     [ValidateNever]
-    public bool ByExerciseAuthor { get; set; }
+    public User? Author { get; set; }
 }

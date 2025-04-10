@@ -1,16 +1,13 @@
 using Coursework.Interfaces.Database;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coursework.Controllers;
 
+[Authorize(Policy = "UserAccess")]
 public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
-    public IActionResult Index(long id)
-    {
-        return View();
-    }
-    
     public async Task<IActionResult> Create(long id, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);

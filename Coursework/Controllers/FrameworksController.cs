@@ -1,10 +1,13 @@
+using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coursework.Controllers;
 
+[Authorize(Roles = "Администратор")]
 public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -55,7 +58,8 @@ public class FrameworksController(IUnitOfWorkFactory uowFactory, ILogger<HomeCon
         var id = await uow.Frameworks.AddAsync(framework);
         await uow.CommitAsync(ct);
         
-        logger.LogInformation("Добавлен фреймворк. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}", id, framework.Name, framework.Description);
+        logger.LogInformation("Добавлен фреймворк. Id:{Id}, Название:{LanguageName}, Описание:{LanguageDescription}, Автор: {AuthorId}",
+            id, framework.Name, framework.Description, User.GetId());
             
         return RedirectToAction("Index");
     }

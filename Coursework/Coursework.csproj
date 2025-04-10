@@ -8,12 +8,15 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="BCrypt.Net" Version="0.1.0" />
       <PackageReference Include="Dapper" Version="2.1.66" />
       <PackageReference Include="FluentMigrator" Version="7.1.0" />
       <PackageReference Include="FluentMigrator.Extensions.Postgres" Version="7.1.0" />
       <PackageReference Include="FluentMigrator.Runner" Version="7.1.0" />
+      <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.15" />
       <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.2.0" />
       <PackageReference Include="Npgsql" Version="9.0.3" />
+      <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.8.0" />
     </ItemGroup>
 
     <ItemGroup>

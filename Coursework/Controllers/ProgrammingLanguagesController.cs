@@ -1,10 +1,13 @@
+using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coursework.Controllers;
 
+[Authorize(Roles = "Администратор")]
 public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
     public async Task<IActionResult> Index(CancellationToken ct)
@@ -42,8 +45,8 @@ public class ProgrammingLanguagesController(IUnitOfWorkFactory uowFactory, ILogg
         await uow.CommitAsync(ct);
         
         logger.LogInformation(
-            "Добавлен язык программирования. Id:{Id}, Название:{Name}, Описание:{Description}",
-            id, language.Name, language.Description);
+            "Добавлен язык программирования. Id:{Id}, Название:{Name}, Описание:{Description}, Автор:{AuthorId}",
+            id, language.Name, language.Description, User.GetId());
         
         return RedirectToAction("Index");
     }

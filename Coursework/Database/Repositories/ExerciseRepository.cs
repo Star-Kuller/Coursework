@@ -170,10 +170,10 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             var ex = g.First();
             ex.AuthorSolution = g
                 .SelectMany(e => e.Solutions)
-                .FirstOrDefault(e => e.ByExerciseAuthor);
+                .FirstOrDefault(s => s.AuthorId == ex.AuthorId);
             ex.Solutions = g
                 .SelectMany(e => e.Solutions)
-                .Where(e => !e.ByExerciseAuthor)
+                .Where(s => s.AuthorId != ex.AuthorId)
                 .ToList();
             return ex;
         }).FirstOrDefault();

@@ -25,7 +25,7 @@ public static class ExerciseExtensions
                 Id = exerciseDto.AuthorSolutionId,
                 S3Key = exerciseDto.S3KeyAuthorSolution,
                 ExerciseId = exerciseDto.Id,
-                ByExerciseAuthor = true
+                //TODO Добавить AuthorId
             },
             Hints = exerciseDto.Hints.ToList()
         };

@@ -1,11 +1,14 @@
+using System.Security.Claims;
 using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models.DTOs;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Coursework.Controllers;
 
+[Authorize(Policy = "UserAccess")]
 public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeController> logger) : Controller
 {
     public async Task<IActionResult> Index(string search, CancellationToken ct)
@@ -18,7 +21,7 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         
         return View();
     }
-    
+
     public async Task<IActionResult> Create(CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
@@ -80,7 +83,10 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
             return View(exercise);
         }
 
+        var currentUserId = User.GetId();
+
         var exerciseEntity = exercise.Map();
+        exerciseEntity.AuthorId = currentUserId;
         var id = await uow.Exercises.AddAsync(exerciseEntity);
         var solution = exerciseEntity.AuthorSolution;
         solution!.ExerciseId = id;
@@ -88,8 +94,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         await uow.CommitAsync(ct);
 
         logger.LogInformation(
-            "Добавлено упражнение. Id:{Id}, Название:{Name}, Баллы:{Score}", 
-            id, exercise.Name, exercise.Score);
+            "Добавлено упражнение. Id:{Id}, Название:{Name}, Баллы:{Score}, Автор: {AuthorId}", 
+            id, exercise.Name, exercise.Score, exerciseEntity.AuthorId);
 
         return RedirectToAction("Index");
     }
