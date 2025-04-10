@@ -59,4 +59,10 @@ public class ExerciseDto : IName
 
     [ValidateNever]
     public IList<Hint> Hints { get; set; } = new List<Hint>();
+    
+    [ValidateNever]
+    public long AuthorId { get; set; }
+    
+    [ValidateNever]
+    public User? Author { get; set; }
 }

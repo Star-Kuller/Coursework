@@ -1,6 +1,5 @@
 using System.Data;
 using Coursework.Interfaces.Database.Repositories;
-using Coursework.Models;
 using Coursework.Models.Entities;
 using Dapper;
 
@@ -16,11 +15,11 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         const string insertExerciseSql = """
             INSERT INTO exercises (
                 name, difficulty_id, language_id, score, short_description, full_description, 
-                is_published, s3_key_source, s3_key_tests
+                is_published, s3_key_source, s3_key_tests, author_id
             )
             VALUES (
                 @Name, @DifficultyId, @LanguageId, @Score, @ShortDescription, @FullDescription, 
-                @IsPublished, @S3KeySource, @S3KeyTests
+                @IsPublished, @S3KeySource, @S3KeyTests, @AuthorId
             )
             RETURNING id
             """;
@@ -28,31 +27,33 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         var exerciseId = await connection.QuerySingleOrDefaultAsync<long>(
             insertExerciseSql, exercise, transaction);
 
-        if (!exercise.Frameworks.Any()) return exerciseId;
-        
-        const string insertFrameworksSql = """
-                                           INSERT INTO frameworks_exercises (framework_id, exercise_id)
-                                           VALUES (@FrameworkId, @ExerciseId)
-                                           """;
+        if (exercise.Frameworks.Any())
+        {
+            const string insertFrameworksSql = """
+                                               INSERT INTO frameworks_exercises (framework_id, exercise_id)
+                                               VALUES (@FrameworkId, @ExerciseId)
+                                               """;
 
-        var frameworkParams = exercise.Frameworks
-            .Where(f => f.Id > 0)
-            .Select(f => new { FrameworkId = f.Id, ExerciseId = exerciseId });
+            var frameworkParams = exercise.Frameworks
+                .Where(f => f.Id > 0)
+                .Select(f => new { FrameworkId = f.Id, ExerciseId = exerciseId });
 
-        await connection.ExecuteAsync(insertFrameworksSql, frameworkParams, transaction);
-        
-        if (!exercise.Hints.Any()) return exerciseId;
-        
-        foreach (var hint in exercise.Hints)
-            hint.ExerciseId = exerciseId;
-        
-        const string insertHintsSql = """
-                                           INSERT INTO hints (exercise_id, cost, text)
-                                           VALUES (@ExerciseId, @Cost, @Text)
-                                           """;
+            await connection.ExecuteAsync(insertFrameworksSql, frameworkParams, transaction);
+        }
 
-        await connection.ExecuteAsync(insertHintsSql, exercise.Hints, transaction);
+        if (exercise.Hints.Any())
+        {
+            foreach (var hint in exercise.Hints)
+                hint.ExerciseId = exerciseId;
+        
+            const string insertHintsSql = """
+                                          INSERT INTO hints (exercise_id, cost, text)
+                                          VALUES (@ExerciseId, @Cost, @Text)
+                                          """;
 
+            await connection.ExecuteAsync(insertHintsSql, exercise.Hints, transaction);
+        }
+        
         return exerciseId;
     }
 
@@ -129,12 +130,15 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                            SELECT e.*,
                                   d.*,
                                   l.*,
-                                  s.*
+                                  u.*,
+                                  h.*
                            FROM exercises e
                            LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
                            LEFT JOIN programing_languages l ON e.language_id = l.id
-                           LEFT JOIN solutions s ON e.id = s.exercise_id
+                           LEFT JOIN users u ON e.author_id = u.id
+                           LEFT JOIN hints h ON e.id = h.exercise_id
                            WHERE e.id = @Id
+                           ORDER BY h.cost
                            """;
     
         const string frameworksSql = """
@@ -143,54 +147,67 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                                      INNER JOIN frameworks_exercises fe ON f.id = fe.framework_id
                                      WHERE fe.exercise_id = @ExerciseId
                                      """;
-    
-        const string hintsSql = """
-                                     SELECT h.*
-                                     FROM hints h
-                                     WHERE h.exercise_id = @ExerciseId
-                                     ORDER BY h.cost
-                                     """;
-    
-        var exercise = await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, Solution, Exercise>(
+        
+        const string solutionsSql = """
+                                    SELECT s.*,
+                                           u.*
+                                    FROM solutions s
+                                    LEFT JOIN users u ON s.author_id = u.id
+                                    WHERE s.exercise_id = @ExerciseId
+                                    """;
+        
+        var hintsDict = new Dictionary<long, Hint>();
+        Exercise? result = null;
+        
+        await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, User, Hint, Exercise>(
             sql,
-            (exercise, difficulty, language, solution) =>
+            (exercise, difficulty, language, author, hint) =>
             {
-                exercise.Difficulty = difficulty;
-                exercise.Language = language;
-                exercise.Solutions.Add(solution);
-                return exercise;
+                if (result == null)
+                {
+                    result = exercise;
+                    result.Difficulty = difficulty;
+                    result.Language = language;
+                    result.Author = author;
+                    result.Hints = new List<Hint>();
+                }
+                
+                if (hint is not null && hintsDict.TryAdd(hint.Id, hint))
+                {
+                    result.Hints.Add(hint);
+                }
+                
+                return result;
             },
             new { Id = id },
             transaction,
             splitOn: "id"
         );
-    
-        var result = exercise.GroupBy(e => e.Id).Select(g =>
-        {
-            var ex = g.First();
-            ex.AuthorSolution = g
-                .SelectMany(e => e.Solutions)
-                .FirstOrDefault(s => s.AuthorId == ex.AuthorId);
-            ex.Solutions = g
-                .SelectMany(e => e.Solutions)
-                .Where(s => s.AuthorId != ex.AuthorId)
-                .ToList();
-            return ex;
-        }).FirstOrDefault();
-
-        if (result == null) return result;
+        
+        if (result == null) return null;
         
         result.Frameworks = (await connection.QueryAsync<Framework>(
             frameworksSql,
             new { ExerciseId = id },
             transaction
         )).ToList();
-    
-        result.Hints = (await connection.QueryAsync<Hint>(
-            hintsSql,
+        
+        var solutions = await connection.QueryAsync<Solution, User, Solution>(
+            solutionsSql,
+            (solution, author) =>
+            {
+                solution.Author = author;
+                return solution;
+            },
             new { ExerciseId = id },
-            transaction
-        )).ToList();
+            transaction,
+            splitOn: "id"
+        );
+        
+        var solutionsList = solutions.ToList();
+        
+        result.AuthorSolution = solutionsList.FirstOrDefault(s => s.AuthorId == result.AuthorId);
+        result.Solutions = solutionsList.Where(s => s.AuthorId != result.AuthorId && s.Id > 0).ToList();
 
         return result;
     }
@@ -205,22 +222,26 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         const string sql = """
                            SELECT e.*,
                                   d.*,
-                                  l.*
+                                  l.*,
+                                  u.*
                            FROM exercises e
                            LEFT JOIN difficulty_levels d ON e.difficulty_id = d.id
                            LEFT JOIN programing_languages l ON e.language_id = l.id
+                           LEFT JOIN users u ON e.author_id = u.id
                            WHERE @SearchPattern IS NULL 
                               OR e.name LIKE @SearchPattern
                               OR e.short_description LIKE @SearchPattern
+                              OR l.name LIKE @SearchPattern
                            ORDER BY e.id
                            """;
 
-        var exercises = await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, Exercise>(
+        var exercises = await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, User, Exercise>(
             sql,
-            (exercise, difficulty, language) =>
+            (exercise, difficulty, language, author) =>
             {
                 exercise.Difficulty = difficulty;
                 exercise.Language = language;
+                exercise.Author = author;
                 return exercise;
             },
             new

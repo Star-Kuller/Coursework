@@ -1,3 +1,4 @@
+using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,8 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         if (!ModelState.IsValid) return View(solution);
         
         await using var uow = await uowFactory.CreateAsync(ct);
-        var id = await uow.Solutions.AddAsync(solution);
+        solution.AuthorId = User.GetId();
+        await uow.Solutions.AddAsync(solution);
         await uow.CommitAsync(ct);
         
         logger.LogInformation(

@@ -37,8 +37,8 @@
 
                         <!-- Количество баллов -->
                         <div class="mb-3">
-                            <label for="Score" class="form-label">Количество баллов</label>
-                            <input type="number" class="form-control rounded-pill" id="Score" asp-for="Score" placeholder="Введите количество баллов">
+                            <label for="Score" class="form-label">Количество очков</label>
+                            <input type="number" class="form-control rounded-pill" id="Score" asp-for="Score" placeholder="Введите количество очков">
                             <span asp-validation-for="Score" class="text-danger"></span>
                         </div>
 
@@ -110,6 +110,8 @@
                         <div id="selectedFrameworks" class="mt-2">
                             <!-- Фреймворки будут добавляться сюда -->
                         </div>
+                        
+                        <!--TODO Добавить систему подсказок-->
 
                         <!-- Кнопки сохранения -->
                         <div class="d-flex gap-2 mt-4">

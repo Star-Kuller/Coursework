@@ -83,10 +83,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
             return View(exercise);
         }
 
-        var currentUserId = User.GetId();
-
+        exercise.AuthorId = User.GetId();
         var exerciseEntity = exercise.Map();
-        exerciseEntity.AuthorId = currentUserId;
         var id = await uow.Exercises.AddAsync(exerciseEntity);
         var solution = exerciseEntity.AuthorSolution;
         solution!.ExerciseId = id;
@@ -129,7 +127,6 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         if (prev.IsPublished)
             exercise.IsPublished = true;
         
-        // Обновление упражнения
         await uow.Exercises.UpdateAsync(exercise.Map());
         await uow.CommitAsync(ct);
         

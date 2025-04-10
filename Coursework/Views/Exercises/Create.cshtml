@@ -37,8 +37,8 @@
 
                         <!-- Количество баллов -->
                         <div class="mb-3">
-                            <label for="Score" class="form-label">Количество баллов</label>
-                            <input type="number" class="form-control rounded-pill" id="Score" asp-for="Score" placeholder="Введите количество баллов">
+                            <label for="Score" class="form-label">Количество очков</label>
+                            <input type="number" class="form-control rounded-pill" id="Score" asp-for="Score" placeholder="Введите количество очков">
                             <span asp-validation-for="Score" class="text-danger"></span>
                         </div>
 
@@ -315,17 +315,23 @@
 
     // Инициализация выбранных фреймворков из ViewBag
     document.addEventListener('DOMContentLoaded', function () {
-        @if (Model?.Frameworks != null)
+        @foreach (var framework in Model.Frameworks)
         {
-            foreach (var framework in Model.Frameworks)
-            {
-                <text>
-                    selectedFrameworks.push({
+            
+            <text>selectedFrameworks.push({
                     id: '@framework.Id',
                     name: '@framework.Name'
-                    });
-                </text>
-            }
+                    });</text>
+                
+        }
+        @foreach (var hint in Model.Hints)
+        {
+            
+            <text>hints.push({
+                    cost: '@hint.Id',
+                    text: '@hint.Text'
+                    });</text>
+                
         }
         renderSelectedFrameworks();
     });

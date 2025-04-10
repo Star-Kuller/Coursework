@@ -1,3 +1,5 @@
+@using Coursework.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Coursework.Models.DTOs.ExerciseDto
 
 @{
@@ -27,7 +29,7 @@
                             <strong>Фреймворки:</strong> @string.Join(", ", Model.Frameworks.Select(f => f.Name))
                         </li>
                         <li class="list-group-item">
-                            <strong>Автор:</strong> Имя автора
+                            <strong>Автор:</strong> @Model.Author?.Name
                         </li>
                     </ul>
 
@@ -89,10 +91,19 @@
                     <tr>
                         <th scope="col">Автор</th>
                         <th scope="col" class="text-end">
-                            <a class="btn btn-primary btn-sm rounded-pill"
-                               asp-controller="Solution"
-                               asp-action="Create"
-                               asp-route-id="@Model.Id">Загрузить решение</a>
+                            @if (User.GetId() == Model.AuthorId)
+                            {
+                                <span>Вы автор, вы не можете загрузить решение на своё же задание.</span>
+                            }
+                            else
+                            {
+                                <a class="btn btn-primary btn-sm rounded-pill"
+                                   asp-controller="Solution"
+                                   asp-action="Create"
+                                   asp-route-id="@Model.Id">
+                                    Загрузить решение
+                                </a>
+                            }
                         </th>
                     </tr>
                     </thead>
@@ -101,7 +112,7 @@
                     {
                         <tr>
                             <td>
-                                Имя автора
+                                @solution.Author?.Name
                             </td>
                             <td class="text-end">
                                 <form method="post"
@@ -114,11 +125,14 @@
                                            asp-controller="Solution"
                                            asp-action="View"
                                            asp-route-id="@solution.Id">Посмотреть</a>
-                                        <a class="btn btn-sm btn-secondary"
-                                           asp-controller="Solution"
-                                           asp-action="Update"
-                                           asp-route-id="@solution.Id">Редактировать</a>
-                                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                        @if (User.GetId() == solution.AuthorId || User.IsInRole("Администратор"))
+                                        {
+                                            <a class="btn btn-sm btn-secondary"
+                                               asp-controller="Solution"
+                                               asp-action="Update"
+                                               asp-route-id="@solution.Id">Редактировать</a>
+                                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                        }
                                     </div>
                                 </form>
                             </td>

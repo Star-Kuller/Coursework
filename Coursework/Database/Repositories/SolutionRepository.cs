@@ -12,8 +12,8 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
         ArgumentNullException.ThrowIfNull(solution);
 
         const string sql = """
-                           INSERT INTO solutions (s3_key, exercise_id, by_exercise_author)
-                           VALUES (@S3Key, @ExerciseId, @ByExerciseAuthor)
+                           INSERT INTO solutions (s3_key, exercise_id, author_id)
+                           VALUES (@S3Key, @ExerciseId, @AuthorId)
                            RETURNING id
                            """;
 
@@ -50,18 +50,21 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
     {
         const string sql = """
                            SELECT s.*, 
-                                  e.*
+                                  e.*,
+                                  u.*
                            FROM solutions s
                            LEFT JOIN exercises e ON s.exercise_id = e.id
+                           LEFT JOIN users u ON s.author_id = u.id
                            WHERE s.id = @Id
                            LIMIT 1
                            """;
 
-        var result = await connection.QueryAsync<Solution, Exercise, Solution>(
+        var result = await connection.QueryAsync<Solution, Exercise, User, Solution>(
             sql,
-            (solution, exercise) =>
+            (solution, exercise, author) =>
             {
                 solution.Exercise = exercise;
+                solution.Author = author;
                 return solution;
             },
             new { Id = id },
@@ -75,26 +78,50 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
     public async Task<List<Solution>> GetAllAsync()
     {
         const string sql = """
-                           SELECT *
-                           FROM solutions
-                           ORDER BY id
+                           SELECT s.*,
+                                  u.*
+                           FROM solutions s
+                           LEFT JOIN users u ON s.author_id = u.id
+                           ORDER BY s.id
                            """;
 
-        var result = await connection.QueryAsync<Solution>(sql, transaction);
+        var result = await connection.QueryAsync<Solution, User, Solution>(
+            sql,
+            (solution, author) =>
+            {
+                solution.Author = author;
+                return solution;
+            },
+            transaction,
+            splitOn: "id"
+        );
+        
         return result.ToList();
     }
 
     public async Task<List<Solution>> GetAllByExerciseAsync(long exerciseId)
     {
         const string sql = """
-                           SELECT *
-                           FROM solutions
-                           WHERE exercises_id = @ExerciseId
-                           ORDER BY id
+                           SELECT s.*,
+                                  u.*
+                           FROM solutions s
+                           LEFT JOIN users u ON s.author_id = u.id
+                           WHERE s.exercise_id = @ExerciseId
+                           ORDER BY s.id
                            """;
 
-        var result = await connection.QueryAsync<Solution>(sql, 
-            new { ExerciseId = exerciseId }, transaction);
+        var result = await connection.QueryAsync<Solution, User, Solution>(
+            sql, 
+            (solution, author) =>
+            {
+                solution.Author = author;
+                return solution;
+            },
+            new { ExerciseId = exerciseId }, 
+            transaction,
+            splitOn: "id"
+        );
+        
         return result.ToList();
     }
 }

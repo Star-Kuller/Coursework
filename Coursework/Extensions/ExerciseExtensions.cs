@@ -20,12 +20,13 @@ public static class ExerciseExtensions
             S3KeySource = exerciseDto.S3KeySource,
             S3KeyTests = exerciseDto.S3KeyTests!,
             Frameworks = exerciseDto.Frameworks,
+            AuthorId = exerciseDto.AuthorId,
             AuthorSolution = new Solution
             {
                 Id = exerciseDto.AuthorSolutionId,
                 S3Key = exerciseDto.S3KeyAuthorSolution,
                 ExerciseId = exerciseDto.Id,
-                //TODO Добавить AuthorId
+                AuthorId = exerciseDto.AuthorId
             },
             Hints = exerciseDto.Hints.ToList()
         };
@@ -48,6 +49,8 @@ public static class ExerciseExtensions
             S3KeySource = exercise.S3KeySource,
             S3KeyTests = exercise.S3KeyTests,
             Frameworks = exercise.Frameworks,
+            AuthorId = exercise.AuthorId,
+            Author = exercise.Author,
             AuthorSolutionId = exercise.AuthorSolution?.Id ?? default,
             S3KeyAuthorSolution = exercise.AuthorSolution?.S3Key!,
             Solutions = exercise.Solutions,
