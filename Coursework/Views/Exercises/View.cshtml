@@ -29,7 +29,7 @@
                             <strong>Фреймворки:</strong> @string.Join(", ", Model.Frameworks.Select(f => f.Name))
                         </li>
                         <li class="list-group-item">
-                            <strong>Автор:</strong> @Model.Author?.Name
+                            <strong>Автор:</strong> <partial name="_AuthorLink" model="@Model.Author" />
                         </li>
                     </ul>
 
@@ -86,60 +86,78 @@
                 <div class="card-header">
                     <h4 class="card-title text-center">Решения</h4>
                 </div>
-                <table class="table">
-                    <thead>
-                    <tr>
-                        <th scope="col">Автор</th>
-                        <th scope="col" class="text-end">
-                            @if (User.GetId() == Model.AuthorId)
+                <div class="card-body">
+                    @if (Model.Solutions.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th scope="col">Автор</th>
+                                <th scope="col" class="text-end">
+                                    @if (User.GetId() == Model.AuthorId)
+                                    {
+                                        <span>Вы автор, вы не можете загрузить решение на своё же задание.</span>
+                                    }
+                                    else
+                                    {
+                                        <a class="btn btn-primary btn-sm rounded-pill"
+                                           asp-controller="Solution"
+                                           asp-action="Create"
+                                           asp-route-id="@Model.Id">
+                                            Загрузить решение
+                                        </a>
+                                    }
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                            @foreach (var solution in Model.Solutions)
                             {
-                                <span>Вы автор, вы не можете загрузить решение на своё же задание.</span>
+                                <tr>
+                                    <td><partial name="_AuthorLink" model="@solution.Author" /></td>
+                                    <td class="text-end">
+                                        <form method="post"
+                                              asp-controller="Solution"
+                                              asp-action="Delete"
+                                              asp-route-id="@solution.Id"
+                                              onsubmit="return confirm('Вы уверены, что хотите удалить этот упражнение?');">
+                                            <div class="btn-group rounded-pill">
+                                                <a class="btn btn-sm btn-primary"
+                                                   asp-controller="Solution"
+                                                   asp-action="View"
+                                                   asp-route-id="@solution.Id">Посмотреть</a>
+                                                @if (User.GetId() == solution.AuthorId || User.IsInRole("Администратор"))
+                                                {
+                                                    <a class="btn btn-sm btn-secondary"
+                                                       asp-controller="Solution"
+                                                       asp-action="Update"
+                                                       asp-route-id="@solution.Id">Редактировать</a>
+                                                    <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                                                }
+                                            </div>
+                                        </form>
+                                    </td>
+                                </tr>
                             }
-                            else
-                            {
-                                <a class="btn btn-primary btn-sm rounded-pill"
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-center">Для этого упражнения еще нет решений</p>
+                        @if (User.GetId() != Model.AuthorId)
+                        {
+                            <div class="text-center mt-3">
+                                <a class="btn btn-primary rounded-pill"
                                    asp-controller="Solution"
                                    asp-action="Create"
                                    asp-route-id="@Model.Id">
                                     Загрузить решение
                                 </a>
-                            }
-                        </th>
-                    </tr>
-                    </thead>
-                    <tbody class="table-group-divider">
-                    @foreach (var solution in Model.Solutions)
-                    {
-                        <tr>
-                            <td>
-                                @solution.Author?.Name
-                            </td>
-                            <td class="text-end">
-                                <form method="post"
-                                      asp-controller="Solution"
-                                      asp-action="Delete"
-                                      asp-route-id="@solution.Id"
-                                      onsubmit="return confirm('Вы уверены, что хотите удалить этот упражнение?');">
-                                    <div class="btn-group rounded-pill">
-                                        <a class="btn btn-sm btn-primary"
-                                           asp-controller="Solution"
-                                           asp-action="View"
-                                           asp-route-id="@solution.Id">Посмотреть</a>
-                                        @if (User.GetId() == solution.AuthorId || User.IsInRole("Администратор"))
-                                        {
-                                            <a class="btn btn-sm btn-secondary"
-                                               asp-controller="Solution"
-                                               asp-action="Update"
-                                               asp-route-id="@solution.Id">Редактировать</a>
-                                            <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
-                                        }
-                                    </div>
-                                </form>
-                            </td>
-                        </tr>
+                            </div>
+                        }
                     }
-                    </tbody>
-                </table>
+                </div>
             </div>
         </div>
     </div>

@@ -312,28 +312,28 @@
             form.appendChild(textInput);
         });
     });
-
-    // Инициализация выбранных фреймворков из ViewBag
+    
     document.addEventListener('DOMContentLoaded', function () {
+    @if (Model is not null)
+    {
         @foreach (var framework in Model.Frameworks)
         {
-            
             <text>selectedFrameworks.push({
                     id: '@framework.Id',
                     name: '@framework.Name'
                     });</text>
-                
         }
+
         @foreach (var hint in Model.Hints)
         {
-            
             <text>hints.push({
                     cost: '@hint.Id',
                     text: '@hint.Text'
                     });</text>
-                
         }
+    }
         renderSelectedFrameworks();
+        renderHints();
     });
     </script>
 }

@@ -49,7 +49,7 @@
                                     <strong>Язык:</strong> @exercises.Language.Name
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Автор:</strong> @exercises.Author.Name
+                                    <strong>Автор:</strong> <partial name="_AuthorLink" model="@exercises.Author" />
                                 </li>
                             </ul>
                             <div class="d-flex justify-content-between align-items-center mt-3">

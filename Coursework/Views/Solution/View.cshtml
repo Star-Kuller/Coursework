@@ -21,6 +21,9 @@
                            asp-controller="Exercises"
                            asp-action="View"
                            asp-route-id="@Model.ExerciseId">Назад</a>
+                        <li class="list-group-item">
+                            <strong>Автор:</strong> <partial name="_AuthorLink" model="@Model.Author" />
+                        </li>
                     </div>
                 </div>
             </div>

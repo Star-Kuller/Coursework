@@ -20,7 +20,7 @@ public class ExerciseDto : IName
     public long LanguageId { get; set; }
     
     
-    [Range(1, long.MaxValue, ErrorMessage = "Количество баллов должно быть больше 0.")]
+    [Range(1, 25000, ErrorMessage = "Количество очков должно быть от 0 до 25000.")]
     [Required(ErrorMessage = "Количество очков обязательно.")]
     public long Score { get; set; }
 

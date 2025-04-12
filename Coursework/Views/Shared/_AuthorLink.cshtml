@@ -1,0 +1,12 @@
+@model Coursework.Models.Entities.User
+
+@if (Model is not null)
+{
+    <a asp-controller="User" asp-action="View" asp-route-id="@Model.Id" class="text-primary" style="text-decoration: none; cursor: pointer;">
+        @Model.Name
+    </a>
+}
+else
+{
+    <span>Неизвестный автор</span>
+}
