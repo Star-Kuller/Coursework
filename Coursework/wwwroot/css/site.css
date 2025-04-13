@@ -79,3 +79,7 @@ body {
 .navbar .bi {
     font-size: 1.5em;
 }
+
+.hide-accordion-arrow .accordion-button::after {
+    display: none !important;
+}

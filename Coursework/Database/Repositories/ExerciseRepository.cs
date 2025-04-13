@@ -11,18 +11,18 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     public async Task<long> AddAsync(Exercise exercise)
     {
         ArgumentNullException.ThrowIfNull(exercise);
-        
+
         const string insertExerciseSql = """
-            INSERT INTO exercises (
-                name, difficulty_id, language_id, score, short_description, full_description, 
-                is_published, s3_key_source, s3_key_tests, author_id
-            )
-            VALUES (
-                @Name, @DifficultyId, @LanguageId, @Score, @ShortDescription, @FullDescription, 
-                @IsPublished, @S3KeySource, @S3KeyTests, @AuthorId
-            )
-            RETURNING id
-            """;
+                                         INSERT INTO exercises (
+                                             name, difficulty_id, language_id, score, short_description, full_description, 
+                                             is_published, s3_key_source, s3_key_tests, author_id
+                                         )
+                                         VALUES (
+                                             @Name, @DifficultyId, @LanguageId, @Score, @ShortDescription, @FullDescription, 
+                                             @IsPublished, @S3KeySource, @S3KeyTests, @AuthorId
+                                         )
+                                         RETURNING id
+                                         """;
 
         var exerciseId = await connection.QuerySingleOrDefaultAsync<long>(
             insertExerciseSql, exercise, transaction);
@@ -45,7 +45,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         {
             foreach (var hint in exercise.Hints)
                 hint.ExerciseId = exerciseId;
-        
+
             const string insertHintsSql = """
                                           INSERT INTO hints (exercise_id, cost, text)
                                           VALUES (@ExerciseId, @Cost, @Text)
@@ -53,45 +53,45 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
             await connection.ExecuteAsync(insertHintsSql, exercise.Hints, transaction);
         }
-        
+
         return exerciseId;
     }
 
     public async Task UpdateAsync(Exercise exercise)
     {
         ArgumentNullException.ThrowIfNull(exercise);
-        
+
         const string updateExerciseSql = """
-            UPDATE exercises
-            SET 
-                name = @Name, difficulty_id = @DifficultyId, language_id = @LanguageId, score = @Score, 
-                short_description = @ShortDescription, full_description = @FullDescription, 
-                is_published = @IsPublished, s3_key_source = @S3KeySource, s3_key_tests = @S3KeyTests
-            WHERE id = @Id
-            """;
+                                         UPDATE exercises
+                                         SET 
+                                             name = @Name, difficulty_id = @DifficultyId, language_id = @LanguageId, score = @Score, 
+                                             short_description = @ShortDescription, full_description = @FullDescription, 
+                                             is_published = @IsPublished, s3_key_source = @S3KeySource, s3_key_tests = @S3KeyTests
+                                         WHERE id = @Id
+                                         """;
 
         await connection.ExecuteAsync(updateExerciseSql, exercise, transaction);
-        
+
         const string deleteFrameworksSql = """
-            DELETE FROM frameworks_exercises
-            WHERE exercise_id = @ExerciseId
-            """;
-        
+                                           DELETE FROM frameworks_exercises
+                                           WHERE exercise_id = @ExerciseId
+                                           """;
+
         const string deleteHintsSql = """
-            DELETE FROM hints
-            WHERE exercise_id = @ExerciseId
-            """;
+                                      DELETE FROM hints
+                                      WHERE exercise_id = @ExerciseId
+                                      """;
 
         await connection.ExecuteAsync(deleteFrameworksSql, new { ExerciseId = exercise.Id }, transaction);
         await connection.ExecuteAsync(deleteHintsSql, new { ExerciseId = exercise.Id }, transaction);
 
-        
+
         if (exercise.Frameworks.Any())
         {
             const string insertFrameworksSql = """
-                INSERT INTO frameworks_exercises (framework_id, exercise_id)
-                VALUES (@FrameworkId, @ExerciseId)
-                """;
+                                               INSERT INTO frameworks_exercises (framework_id, exercise_id)
+                                               VALUES (@FrameworkId, @ExerciseId)
+                                               """;
 
             var frameworkParams = exercise.Frameworks
                 .Where(f => f.Id > 0)
@@ -99,12 +99,12 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
             await connection.ExecuteAsync(insertFrameworksSql, frameworkParams, transaction);
         }
-        
+
         if (exercise.Hints.Any())
         {
             foreach (var hint in exercise.Hints)
                 hint.ExerciseId = exercise.Id;
-        
+
             const string insertHintsSql = """
                                           INSERT INTO hints (exercise_id, cost, text)
                                           VALUES (@ExerciseId, @Cost, @Text)
@@ -117,11 +117,23 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
     public async Task DeleteAsync(long id)
     {
         const string deleteExerciseSql = """
-            DELETE FROM exercises
-            WHERE id = @Id
-            """;
+                                         DELETE FROM exercises
+                                         WHERE id = @Id
+                                         """;
 
         await connection.ExecuteAsync(deleteExerciseSql, new { Id = id }, transaction);
+    }
+
+    // Add this method to the ExerciseRepository class
+    public async Task OpenHintAsync(long hintId, long userId)
+    {
+        const string sql = """
+                           INSERT INTO user_hints (hint_id, user_id)
+                           VALUES (@HintId, @UserId)
+                           ON CONFLICT DO NOTHING
+                           """;
+
+        await connection.ExecuteAsync(sql, new { HintId = hintId, UserId = userId }, transaction);
     }
 
     public async Task<Exercise?> GetAsync(long id)
@@ -140,14 +152,14 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                            WHERE e.id = @Id
                            ORDER BY h.cost
                            """;
-    
+
         const string frameworksSql = """
                                      SELECT f.*
                                      FROM frameworks f
                                      INNER JOIN frameworks_exercises fe ON f.id = fe.framework_id
                                      WHERE fe.exercise_id = @ExerciseId
                                      """;
-        
+
         const string solutionsSql = """
                                     SELECT s.*,
                                            u.*
@@ -155,17 +167,25 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                                     LEFT JOIN users u ON s.author_id = u.id
                                     WHERE s.exercise_id = @ExerciseId
                                     """;
-        
+
         const string likesSql = """
                                 SELECT u.*
                                 FROM users u
                                 INNER JOIN exercise_likes el ON u.id = el.user_id
                                 WHERE el.exercise_id = @ExerciseId
                                 """;
-        
+
+        const string hintUsersSql = """
+                                    SELECT h.id as hint_id, u.*
+                                    FROM users u
+                                    INNER JOIN user_hints uh ON u.id = uh.user_id
+                                    INNER JOIN hints h ON uh.hint_id = h.id
+                                    WHERE h.exercise_id = @ExerciseId
+                                    """;
+
         var hintsDict = new Dictionary<long, Hint>();
         Exercise? result = null;
-        
+
         await connection.QueryAsync<Exercise, DifficultyLevel, ProgrammingLanguage, User, Hint, Exercise>(
             sql,
             (exercise, difficulty, language, author, hint) =>
@@ -178,27 +198,28 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                     result.Author = author;
                     result.Hints = new List<Hint>();
                 }
-                
+
                 if (hint is not null && hintsDict.TryAdd(hint.Id, hint))
                 {
+                    hint.OpenedByUsers = new List<User>();
                     result.Hints.Add(hint);
                 }
-                
+
                 return result;
             },
             new { Id = id },
             transaction,
             splitOn: "id"
         );
-        
+
         if (result == null) return null;
-        
+
         result.Frameworks = (await connection.QueryAsync<Framework>(
             frameworksSql,
             new { ExerciseId = id },
             transaction
         )).ToList();
-        
+
         var solutions = await connection.QueryAsync<Solution, User, Solution>(
             solutionsSql,
             (solution, author) =>
@@ -210,17 +231,31 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             transaction,
             splitOn: "id"
         );
-        
+
         var solutionsList = solutions.ToList();
-        
+
         result.AuthorSolution = solutionsList.FirstOrDefault(s => s.AuthorId == result.AuthorId);
         result.Solutions = solutionsList.Where(s => s.AuthorId != result.AuthorId && s.Id > 0).ToList();
-        
+
         result.LikedByUsers = (await connection.QueryAsync<User>(
             likesSql,
             new { ExerciseId = id },
             transaction
         )).ToList();
+
+        var hintUsers = await connection.QueryAsync<long, User, (long HintId, User User)>(
+            hintUsersSql,
+            (hintId, user) => (hintId, user),
+            new { ExerciseId = id },
+            transaction,
+            splitOn: "id"
+        );
+
+        foreach (var (hintId, user) in hintUsers)
+        {
+            var hint = result.Hints.FirstOrDefault(h => h.Id == hintId);
+            hint?.OpenedByUsers.Add(user);
+        }
 
         return result;
     }
@@ -264,21 +299,21 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             transaction: transaction,
             splitOn: "id"
         );
-        
+
         var result = exercises.ToList();
-        
+
         const string likesSql = """
-                            SELECT el.exercise_id, u.*
-                            FROM exercise_likes el
-                                JOIN users u ON el.user_id = u.id
-                            WHERE el.exercise_id = ANY(@ExerciseIds)
-                            """;
-        
+                                SELECT el.exercise_id, u.*
+                                FROM exercise_likes el
+                                    JOIN users u ON el.user_id = u.id
+                                WHERE el.exercise_id = ANY(@ExerciseIds)
+                                """;
+
         var exerciseIds = result.Select(e => e.Id).ToArray();
         if (exerciseIds.Length == 0) return result;
-        
+
         var likesDict = new Dictionary<long, List<User>>();
-            
+
         var likes = await connection.QueryAsync<long, User, (long ExerciseId, User User)>(
             likesSql,
             (exerciseId, user) => (exerciseId, user),
@@ -286,7 +321,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             transaction,
             splitOn: "id"
         );
-            
+
         foreach (var (exerciseId, user) in likes)
         {
             if (!likesDict.TryGetValue(exerciseId, out var users))
@@ -294,10 +329,10 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                 users = new List<User>();
                 likesDict[exerciseId] = users;
             }
-                
+
             users.Add(user);
         }
-            
+
         foreach (var exercise in result)
         {
             if (likesDict.TryGetValue(exercise.Id, out var users))
@@ -308,7 +343,7 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
 
         return result;
     }
-    
+
     public async Task AddLikeAsync(long exerciseId, long userId)
     {
         const string sql = """
@@ -316,17 +351,17 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                            VALUES (@ExerciseId, @UserId)
                            ON CONFLICT DO NOTHING
                            """;
-        
+
         await connection.ExecuteAsync(sql, new { ExerciseId = exerciseId, UserId = userId }, transaction);
     }
-    
+
     public async Task RemoveLikeAsync(long exerciseId, long userId)
     {
         const string sql = """
                            DELETE FROM exercise_likes
                            WHERE exercise_id = @ExerciseId AND user_id = @UserId
                            """;
-        
+
         await connection.ExecuteAsync(sql, new { ExerciseId = exerciseId, UserId = userId }, transaction);
     }
 }

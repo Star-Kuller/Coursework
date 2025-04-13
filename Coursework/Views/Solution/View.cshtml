@@ -25,7 +25,14 @@
                         </li>
                     </ul>
                 </div>
-                <div class="card-footer">
+                <div class="card-footer d-flex align-content-between">
+                    <a style="width: 200px"
+                       class="btn btn-sm btn-primary rounded-pill align-self-center"
+                       asp-controller="Exercises"
+                       asp-action="View"
+                       asp-route-id="@Model.ExerciseId">
+                        Перейти к упражнению
+                    </a>
                     <div class="d-flex justify-content-end align-items-center">
                         <span class="me-2">@Model.LikedByUsers.Count</span>
                         @if (User.GetId() == Model.AuthorId)
@@ -54,13 +61,6 @@
                             }
                         }
                     </div>
-                    <a style="width: 200px"
-                       class="btn btn-sm btn-primary rounded-pill"
-                       asp-controller="Exercises"
-                       asp-action="View"
-                       asp-route-id="@Model.ExerciseId">
-                        Перейти к упражнению
-                    </a>
                 </div>
             </div>
         </div>

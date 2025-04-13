@@ -73,32 +73,56 @@
                         <p style="white-space: pre-wrap;">@Model.FullDescription</p>
                     </div>
                     
+                    <!-- Replace the hints section with this updated version -->
                     <!-- Подсказки -->
                     <div class="mt-4">
                         <h5 class="text-muted">Подсказки:</h5>
                         <div class="accordion" id="hintsAccordion">
                             @foreach (var hint in Model.Hints)
                             {
-                            <div class="accordion-item">
-                                <h2 class="accordion-header" id="heading-@hint.Id">
-                                    <button class="accordion-button collapsed"
-                                            type="button"
-                                            data-bs-toggle="collapse"
-                                            data-bs-target="#collapse-@hint.Id"
-                                            aria-expanded="false"
-                                            aria-controls="collapse-@hint.Id">
-                                        Подсказка за @hint.Cost очков
-                                    </button>
-                                </h2>
-                                <div id="collapse-@hint.Id"
-                                     class="accordion-collapse collapse"
-                                     aria-labelledby="heading-@hint.Id">
-                                    <div class="accordion-body">@hint.Text</div>
+                                var isHintOpened = hint.OpenedByUsers.Any(u => u.Id == User.GetId()) || User.GetId() == Model.AuthorId;
+                                var buttonClass = isHintOpened ? "" : "disabled";
+                                var headerClass = isHintOpened ? "" : "hide-accordion-arrow";
+                                
+                                <div class="accordion-item">
+                                    <h2 class="accordion-header d-flex @headerClass" id="heading-@hint.Id">
+                                        <button class="accordion-button collapsed @buttonClass"
+                                                type="button"
+                                                data-bs-toggle="@(isHintOpened ? "collapse" : "")"
+                                                data-bs-target="#collapse-@hint.Id"
+                                                aria-expanded="false"
+                                                aria-controls="collapse-@hint.Id">
+                                            Подсказка за @hint.Cost очков
+                                            @if (!isHintOpened)
+                                            {
+                                                <form method="post" asp-controller="Exercises" asp-action="OpenHint" 
+                                                      asp-route-id="@hint.Id" asp-route-exerciseId="@Model.Id">
+                                                    <button type="submit" style="width: 180px;" class="btn btn-sm btn-primary rounded-pill align-self-center me-3">
+                                                        Открыть подсказку
+                                                    </button>
+                                                </form>
+                                            }
+                                        </button>
+                                    </h2>
+                                    <div id="collapse-@hint.Id"
+                                         class="accordion-collapse collapse"
+                                         aria-labelledby="heading-@hint.Id">
+                                        <div class="accordion-body">@if (isHintOpened){@hint.Text}
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
                             }
                         </div>
                     </div>
+                    
+                    <!-- Add this at the top of the view to display error messages -->
+                    @if (TempData["ErrorMessage"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            @TempData["ErrorMessage"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    }
                 </div>
             </div>
             <div class="card mt-1">
