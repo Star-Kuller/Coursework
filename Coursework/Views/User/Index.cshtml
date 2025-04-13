@@ -1,0 +1,59 @@
+@using Coursework.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@model Coursework.Models.Entities.User
+
+@{
+    ViewData["Title"] = "Список пользователей";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Пользователи</h1>
+</div>
+
+<div class="container">
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Имя</th>
+            <th scope="col">Роль</th>
+            <th scope="col">Очки</th>
+            <th scope="col" class="text-end"></th>
+        </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        @foreach (var user in ViewBag.Users)
+        {
+            <tr>
+                <th scope="row">@user.Id</th>
+                <td>@user.Name</td>
+                <td>@user.Role?.Name</td>
+                <td>@user.Score</td>
+                <td class="text-end">
+                    <form
+                        method="post"
+                        asp-controller="User"
+                        asp-action="Delete"
+                        asp-route-id="@user.Id"
+                        onsubmit="return confirm('Вы уверены, что хотите удалить этого пользователя? Это действие нельзя отменить.');">
+                        <div class="btn-group rounded-pill">
+                            <a class="btn btn-sm btn-primary"
+                               asp-controller="User"
+                               asp-action="View"
+                               asp-route-id="@user.Id">Просмотр</a>
+                            <a class="btn btn-sm btn-secondary"
+                               asp-controller="User"
+                               asp-action="Update"
+                               asp-route-id="@user.Id">Редактировать</a>
+                            @if (user.Id != User.GetId())
+                            {
+                                <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                            }
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

@@ -22,6 +22,17 @@ public class UserController(IUnitOfWorkFactory unitOfWorkFactory, ILogger<UserCo
         return View(user);
     }
     
+    [Authorize(Roles = "Администратор")]
+    public async Task<IActionResult> Index(CancellationToken ct)
+    {
+        await using var unitOfWork = await unitOfWorkFactory.CreateAsync(ct);
+        var users = await unitOfWork.Users.GetAllAsync();
+        
+        ViewBag.Users = users;
+        
+        return View();
+    }
+    
     public async Task<IActionResult> Update(long id, CancellationToken ct)
     {
         var currentUserId = User.GetId();
@@ -87,5 +98,31 @@ public class UserController(IUnitOfWorkFactory unitOfWorkFactory, ILogger<UserCo
                 currentUserId, model.Id);
         
         return RedirectToAction("View", new { model.Id });
+    }
+    
+    [HttpPost]
+    [Authorize(Roles = "Администратор")]
+    public async Task<IActionResult> Delete(long id, CancellationToken ct)
+    {
+        await using var unitOfWork = await unitOfWorkFactory.CreateAsync(ct);
+        var user = await unitOfWork.Users.GetAsync(id);
+        
+        if (user == null)
+        {
+            return NotFound();
+        }
+        
+        if (user.Id == User.GetId())
+        {
+            ModelState.AddModelError("", "Вы не можете удалить свой собственный аккаунт");
+            return RedirectToAction("Index");
+        }
+        
+        await unitOfWork.Users.DeleteAsync(id);
+        await unitOfWork.CommitAsync(ct);
+        
+        logger.LogInformation("Администратор {AdminId} удалил пользователя {UserId}", User.GetId(), id);
+        
+        return RedirectToAction("Index");
     }
 }
