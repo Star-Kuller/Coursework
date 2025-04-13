@@ -182,7 +182,7 @@
                                 @foreach (var solution in Model.Solutions)
                                 {
                                     <tr>
-                                        <td>@solution.Exercise?.Name</td>
+                                        <td><partial name="_ExerciseLink" model="@solution.Exercise" /></td>
                                         <td class="text-end">
                                             <div class="btn-group rounded-pill">
                                                 <a class="btn btn-sm btn-primary"

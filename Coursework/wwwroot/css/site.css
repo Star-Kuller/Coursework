@@ -73,3 +73,7 @@ body {
 #hintsAccordion .accordion-body {
     white-space: pre-wrap;
 }
+
+.navbar .bi {
+    font-size: 1.5em;
+}

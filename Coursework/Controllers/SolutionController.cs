@@ -49,6 +49,13 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         await using var uow = await uowFactory.CreateAsync(ct);
         solution.AuthorId = User.GetId();
         await uow.Solutions.AddAsync(solution);
+        var exercise = await uow.Exercises.GetAsync(solution.ExerciseId);
+        var user = await uow.Users.GetAsync(solution.AuthorId);
+        if (user is not null && exercise is not null)
+        {
+            user.Score += exercise.Score;
+            await uow.Users.UpdateAsync(user);
+        }
         await uow.CommitAsync(ct);
         
         logger.LogInformation(
