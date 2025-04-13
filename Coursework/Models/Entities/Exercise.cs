@@ -30,4 +30,6 @@ public class Exercise : Entity, IName
     public IList<Solution> Solutions { get; set; } = new List<Solution>();
     
     public IList<Hint> Hints { get; set; } = new List<Hint>();
+    
+    public IList<User> LikedByUsers { get; set; } = new List<User>();
 }

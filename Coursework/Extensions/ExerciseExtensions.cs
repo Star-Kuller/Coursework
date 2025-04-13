@@ -28,7 +28,8 @@ public static class ExerciseExtensions
                 ExerciseId = exerciseDto.Id,
                 AuthorId = exerciseDto.AuthorId
             },
-            Hints = exerciseDto.Hints.ToList()
+            Hints = exerciseDto.Hints.ToList(),
+            LikedByUsers = exerciseDto.LikedByUsers
         };
     }
     
@@ -54,7 +55,15 @@ public static class ExerciseExtensions
             AuthorSolutionId = exercise.AuthorSolution?.Id ?? default,
             S3KeyAuthorSolution = exercise.AuthorSolution?.S3Key!,
             Solutions = exercise.Solutions,
-            Hints = exercise.Hints.ToList()
+            Hints = exercise.Hints.ToList(),
+            LikedByUsers = exercise.LikedByUsers
         };
+    }
+    
+    public static ExerciseDto MapWithCurrentUser(this Exercise exercise, long currentUserId)
+    {
+        var dto = exercise.Map();
+        dto.IsLikedByCurrentUser = exercise.LikedByUsers.Any(u => u.Id == currentUserId);
+        return dto;
     }
 }

@@ -16,7 +16,10 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         await using var uow = await uowFactory.CreateAsync(ct);
         var exercises = await uow.Exercises.GetAllAsync(search);
         
-        ViewBag.Exercises = exercises;
+        var currentUserId = User.GetId();
+        var exerciseDtos = exercises.Select(e => e.MapWithCurrentUser(currentUserId)).ToList();
+        
+        ViewBag.Exercises = exerciseDtos;
         ViewBag.Search = search;
         
         return View();
@@ -62,7 +65,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         if (exercise is null)
             return NotFound();
         
-        return View(exercise.Map());
+        var currentUserId = User.GetId();
+        return View(exercise.MapWithCurrentUser(currentUserId));
     }
 
     [HttpPost]
@@ -147,5 +151,39 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         logger.LogInformation("Удалено упражнение. Id:{Id}", id);
         
         return RedirectToAction("Index");
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Like(long id, string returnUrl, CancellationToken ct)
+    {
+        var userId = User.GetId();
+        
+        await using var uow = await uowFactory.CreateAsync(ct);
+        await uow.Exercises.AddLikeAsync(id, userId);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation("Пользователь {UserId} лайкнул упражнение {ExerciseId}", userId, id);
+        
+        if (string.IsNullOrEmpty(returnUrl))
+            return RedirectToAction("Index");
+        
+        return Redirect(returnUrl);
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Unlike(long id, string returnUrl, CancellationToken ct)
+    {
+        var userId = User.GetId();
+        
+        await using var uow = await uowFactory.CreateAsync(ct);
+        await uow.Exercises.RemoveLikeAsync(id, userId);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation("Пользователь {UserId} убрал лайк с упражнения {ExerciseId}", userId, id);
+        
+        if (string.IsNullOrEmpty(returnUrl))
+            return RedirectToAction("Index");
+        
+        return Redirect(returnUrl);
     }
 }

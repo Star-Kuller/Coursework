@@ -156,6 +156,13 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
                                     WHERE s.exercise_id = @ExerciseId
                                     """;
         
+        const string likesSql = """
+                                SELECT u.*
+                                FROM users u
+                                INNER JOIN exercise_likes el ON u.id = el.user_id
+                                WHERE el.exercise_id = @ExerciseId
+                                """;
+        
         var hintsDict = new Dictionary<long, Hint>();
         Exercise? result = null;
         
@@ -208,6 +215,12 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
         
         result.AuthorSolution = solutionsList.FirstOrDefault(s => s.AuthorId == result.AuthorId);
         result.Solutions = solutionsList.Where(s => s.AuthorId != result.AuthorId && s.Id > 0).ToList();
+        
+        result.LikedByUsers = (await connection.QueryAsync<User>(
+            likesSql,
+            new { ExerciseId = id },
+            transaction
+        )).ToList();
 
         return result;
     }
@@ -251,7 +264,69 @@ public class ExerciseRepository(IDbConnection connection, IDbTransaction transac
             transaction: transaction,
             splitOn: "id"
         );
+        
+        var result = exercises.ToList();
+        
+        const string likesSql = """
+                            SELECT el.exercise_id, u.*
+                            FROM exercise_likes el
+                                JOIN users u ON el.user_id = u.id
+                            WHERE el.exercise_id = ANY(@ExerciseIds)
+                            """;
+        
+        var exerciseIds = result.Select(e => e.Id).ToArray();
+        if (exerciseIds.Length == 0) return result;
+        
+        var likesDict = new Dictionary<long, List<User>>();
+            
+        var likes = await connection.QueryAsync<long, User, (long ExerciseId, User User)>(
+            likesSql,
+            (exerciseId, user) => (exerciseId, user),
+            new { ExerciseIds = exerciseIds },
+            transaction,
+            splitOn: "id"
+        );
+            
+        foreach (var (exerciseId, user) in likes)
+        {
+            if (!likesDict.TryGetValue(exerciseId, out var users))
+            {
+                users = new List<User>();
+                likesDict[exerciseId] = users;
+            }
+                
+            users.Add(user);
+        }
+            
+        foreach (var exercise in result)
+        {
+            if (likesDict.TryGetValue(exercise.Id, out var users))
+            {
+                exercise.LikedByUsers = users;
+            }
+        }
 
-        return exercises.ToList();
+        return result;
+    }
+    
+    public async Task AddLikeAsync(long exerciseId, long userId)
+    {
+        const string sql = """
+                           INSERT INTO exercise_likes (exercise_id, user_id)
+                           VALUES (@ExerciseId, @UserId)
+                           ON CONFLICT DO NOTHING
+                           """;
+        
+        await connection.ExecuteAsync(sql, new { ExerciseId = exerciseId, UserId = userId }, transaction);
+    }
+    
+    public async Task RemoveLikeAsync(long exerciseId, long userId)
+    {
+        const string sql = """
+                           DELETE FROM exercise_likes
+                           WHERE exercise_id = @ExerciseId AND user_id = @UserId
+                           """;
+        
+        await connection.ExecuteAsync(sql, new { ExerciseId = exerciseId, UserId = userId }, transaction);
     }
 }

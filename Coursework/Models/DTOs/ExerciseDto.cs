@@ -65,4 +65,10 @@ public class ExerciseDto : IName
     
     [ValidateNever]
     public User? Author { get; set; }
+    
+    [ValidateNever]
+    public IList<User> LikedByUsers { get; set; } = new List<User>();
+    
+    [ValidateNever]
+    public bool IsLikedByCurrentUser { get; set; }
 }

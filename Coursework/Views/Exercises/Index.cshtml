@@ -30,52 +30,72 @@
     </div>
     <hr class="bg-black"/>
     <div class="row row-cols-3 mt-5 g-3">
-        @foreach (var exercises in ViewBag.Exercises)
+        @foreach (var exercise in ViewBag.Exercises)
         {
             <div class="col">
                 <div class="card" style="height: 440px;">
                     <div class="card-body d-flex flex-column">
-                        <h4 class="card-title" style="overflow-y: auto; max-height: 3.5em;">@exercises.Name</h4>
-                        <p class="card-text" style="overflow-y: auto; max-height: 5.5em;">@exercises.ShortDescription</p>
+                        <h4 class="card-title" style="overflow-y: auto; max-height: 3.5em;">@exercise.Name</h4>
+                        <p class="card-text" style="overflow-y: auto; max-height: 5.5em;">@exercise.ShortDescription</p>
                         <div class="mt-auto">
                             <ul class="list-group list-group-flush">
                                 <li class="list-group-item">
-                                    <strong>Сложность:</strong> @exercises.Difficulty?.Name
+                                    <strong>Сложность:</strong> @exercise.Difficulty?.Name
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Очки:</strong> @exercises.Score
+                                    <strong>Очки:</strong> @exercise.Score
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Язык:</strong> @exercises.Language.Name
+                                    <strong>Язык:</strong> @exercise.Language.Name
                                 </li>
                                 <li class="list-group-item">
-                                    <strong>Автор:</strong> <partial name="_AuthorLink" model="@exercises.Author" />
+                                    <strong>Автор:</strong> <partial name="_AuthorLink" model="@exercise.Author" />
                                 </li>
                             </ul>
                             <div class="d-flex justify-content-between align-items-center mt-3">
                                 <form method="post"
                                       asp-controller="Exercises"
                                       asp-action="Delete"
-                                      asp-route-id="@exercises.Id"
+                                      asp-route-id="@exercise.Id"
                                       onsubmit="return confirm('Вы уверены, что хотите удалить этот упражнение?');">
                                     <div class="btn-group rounded-pill">
-                                        @if (exercises.IsPublished)
+                                        @if (exercise.IsPublished)
                                         {
                                             <a class="btn btn-sm btn-primary"
                                                asp-controller="Exercises"
                                                asp-action="View"
-                                               asp-route-id="@exercises.Id">Посмотреть</a>
+                                               asp-route-id="@exercise.Id">Посмотреть</a>
                                         }
-                                        @if (User.GetId() == exercises.AuthorId || User.IsInRole("Администратор"))
+                                        @if (User.GetId() == exercise.AuthorId || User.IsInRole("Администратор"))
                                         {
                                             <a class="btn btn-sm btn-secondary"
                                                asp-controller="Exercises"
                                                asp-action="Update"
-                                               asp-route-id="@exercises.Id">Редактировать</a>
+                                               asp-route-id="@exercise.Id">Редактировать</a>
                                             <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
                                         }
                                     </div>
                                 </form>
+                                
+                                @if (User.GetId() != exercise.AuthorId)
+                                {
+                                    @if (exercise.IsLikedByCurrentUser)
+                                    {
+                                        <form method="post" asp-controller="Exercises" asp-action="Unlike" asp-route-id="@exercise.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">
+                                            <button type="submit" class="btn btn-link p-0">
+                                                <i class="bi bi-heart-fill text-danger" style="font-size: 1.5rem;"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form method="post" asp-controller="Exercises" asp-action="Like" asp-route-id="@exercise.Id" asp-route-returnUrl="@Context.Request.Path@Context.Request.QueryString">
+                                            <button type="submit" class="btn btn-link p-0">
+                                                <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                }
                             </div>
                         </div>
                     </div>

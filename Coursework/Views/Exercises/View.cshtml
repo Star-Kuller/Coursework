@@ -31,6 +31,34 @@
                         <li class="list-group-item">
                             <strong>Автор:</strong> <partial name="_AuthorLink" model="@Model.Author" />
                         </li>
+                        <li class="list-group-item d-flex justify-content-end align-items-center">
+                            <span class="me-2">@Model.LikedByUsers.Count</span>
+                            @if (User.GetId() == Model.AuthorId)
+                            {
+                                <button type="button" class="btn btn-link p-0 text-secondary" disabled>
+                                    <i class="bi bi-heart-fill" style="font-size: 1.5rem;"></i>
+                                </button>
+                            }
+                            else
+                            {
+                                @if (Model.IsLikedByCurrentUser)
+                                {
+                                    <form method="post" asp-controller="Exercises" asp-action="Unlike" asp-route-id="@Model.Id" asp-route-returnUrl="@Context.Request.Path">
+                                        <button type="submit" class="btn btn-link p-0">
+                                            <i class="bi bi-heart-fill text-danger" style="font-size: 1.5rem;"></i>
+                                        </button>
+                                    </form>
+                                }
+                                else
+                                {
+                                    <form method="post" asp-controller="Exercises" asp-action="Like" asp-route-id="@Model.Id" asp-route-returnUrl="@Context.Request.Path">
+                                        <button type="submit" class="btn btn-link p-0">
+                                            <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
+                                        </button>
+                                    </form>
+                                }
+                            }
+                        </li>
                     </ul>
 
                     <!-- Короткое описание -->
