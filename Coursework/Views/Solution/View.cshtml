@@ -1,7 +1,11 @@
+@using Coursework.Extensions
+@using Microsoft.AspNetCore.Mvc.TagHelpers
 @model Coursework.Models.Entities.Solution
 
 @{
     ViewData["Title"] = $"Решение упражнения \"{Model.Exercise?.Name}\"";
+    var currentUserId = User.GetId();
+    var hasLiked = Model.LikedByUsers.Any(u => u.Id == currentUserId);
 }
 
 <div class="container">
@@ -12,19 +16,51 @@
                     <h3 class="card-title text-center">Решение упражнения "@Model.Exercise?.Name"</h3>
                 </div>
                 <div class="card-body">
-                    <div class="card-text">
-                        <strong>S3 Ключ:</strong> @Model.S3Key
-                    </div>
-                    <div class="text-end">
-                        <a style="width: 100px"
-                           class="btn btn-sm btn-primary mt-3 rounded-pill"
-                           asp-controller="Exercises"
-                           asp-action="View"
-                           asp-route-id="@Model.ExerciseId">Назад</a>
+                    <ul class="list-group list-group-flush">
                         <li class="list-group-item">
-                            <strong>Автор:</strong> <partial name="_AuthorLink" model="@Model.Author" />
+                            <strong>S3 Ключ:</strong> @Model.S3Key
                         </li>
+                        <li class="list-group-item">
+                            <strong>Автор:</strong> <partial name="_AuthorLink" model="@Model.Author"/>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-end align-items-center">
+                        <span class="me-2">@Model.LikedByUsers.Count</span>
+                        @if (User.GetId() == Model.AuthorId)
+                        {
+                            <button type="button" class="btn btn-link p-0 text-secondary" disabled>
+                                <i class="bi bi-heart-fill" style="font-size: 1.5rem;"></i>
+                            </button>
+                        }
+                        else
+                        {
+                            @if (hasLiked)
+                            {
+                                <form method="post" asp-controller="Solution" asp-action="Unlike" asp-route-id="@Model.Id">
+                                    <button type="submit" class="btn btn-link p-0">
+                                        <i class="bi bi-heart-fill text-danger" style="font-size: 1.5rem;"></i>
+                                    </button>
+                                </form>
+                            }
+                            else
+                            {
+                                <form method="post" asp-controller="Solution" asp-action="Like" asp-route-id="@Model.Id">
+                                    <button type="submit" class="btn btn-link p-0">
+                                        <i class="bi bi-heart" style="font-size: 1.5rem;"></i>
+                                    </button>
+                                </form>
+                            }
+                        }
                     </div>
+                    <a style="width: 200px"
+                       class="btn btn-sm btn-primary rounded-pill"
+                       asp-controller="Exercises"
+                       asp-action="View"
+                       asp-route-id="@Model.ExerciseId">
+                        Перейти к упражнению
+                    </a>
                 </div>
             </div>
         </div>

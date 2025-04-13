@@ -20,4 +20,7 @@ public class Solution : Entity
     
     [ValidateNever]
     public User? Author { get; set; }
+    
+    [ValidateNever]
+    public IList<User> LikedByUsers { get; set; } = new List<User>();
 }

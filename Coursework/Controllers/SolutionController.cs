@@ -96,4 +96,40 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         
         return RedirectToAction("View", "Exercises", new { Id = solution.ExerciseId });
     }
+    
+    [HttpPost]
+    public async Task<IActionResult> Like(long id, CancellationToken ct)
+    {
+        var userId = User.GetId();
+        
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var solution = await uow.Solutions.GetAsync(id);
+        if (solution is null)
+            return NotFound();
+        
+        await uow.Solutions.AddLikeAsync(id, userId);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation("Пользователь {UserId} лайкнул решение {SolutionId}", userId, id);
+        
+        return RedirectToAction("View", new { id });
+    }
+    
+    [HttpPost]
+    public async Task<IActionResult> Unlike(long id, CancellationToken ct)
+    {
+        var userId = User.GetId();
+        
+        await using var uow = await uowFactory.CreateAsync(ct);
+        var solution = await uow.Solutions.GetAsync(id);
+        if (solution is null)
+            return NotFound();
+        
+        await uow.Solutions.RemoveLikeAsync(id, userId);
+        await uow.CommitAsync(ct);
+        
+        logger.LogInformation("Пользователь {UserId} убрал лайк с решения {SolutionId}", userId, id);
+        
+        return RedirectToAction("View", new { id });
+    }
 }

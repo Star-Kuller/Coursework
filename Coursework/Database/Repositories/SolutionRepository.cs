@@ -46,6 +46,28 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
         await connection.ExecuteAsync(sql, new { Id = id }, transaction);
     }
 
+
+    public async Task AddLikeAsync(long solutionId, long userId)
+    {
+        const string sql = """
+                           INSERT INTO solution_likes (solution_id, user_id)
+                           VALUES (@SolutionId, @UserId)
+                           ON CONFLICT DO NOTHING
+                           """;
+        
+        await connection.ExecuteAsync(sql, new { SolutionId = solutionId, UserId = userId }, transaction);
+    }
+
+    public async Task RemoveLikeAsync(long solutionId, long userId)
+    {
+        const string sql = """
+                           DELETE FROM solution_likes
+                           WHERE solution_id = @SolutionId AND user_id = @UserId
+                           """;
+        
+        await connection.ExecuteAsync(sql, new { SolutionId = solutionId, UserId = userId }, transaction);
+    }
+    
     public async Task<Solution?> GetAsync(long id)
     {
         const string sql = """
@@ -58,7 +80,14 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
                            WHERE s.id = @Id
                            LIMIT 1
                            """;
-
+        
+        const string likesSql = """
+                                SELECT u.*
+                                FROM users u
+                                INNER JOIN solution_likes sl ON u.id = sl.user_id
+                                WHERE sl.solution_id = @SolutionId
+                                """;
+    
         var result = await connection.QueryAsync<Solution, Exercise, User, Solution>(
             sql,
             (solution, exercise, author) =>
@@ -71,8 +100,18 @@ public class SolutionRepository(IDbConnection connection, IDbTransaction transac
             transaction,
             splitOn: "id"
         );
-
-        return result.FirstOrDefault();
+    
+        var solution = result.FirstOrDefault();
+        if (solution != null)
+        {
+            solution.LikedByUsers = (await connection.QueryAsync<User>(
+                likesSql,
+                new { SolutionId = id },
+                transaction
+            )).ToList();
+        }
+    
+        return solution;
     }
 
     public async Task<List<Solution>> GetAllAsync()
