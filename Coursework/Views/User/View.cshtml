@@ -97,6 +97,15 @@
                             }
                         </p>
                     </div>
+
+                     @if (User.GetId() == Model.Id || User.IsInRole("Администратор"))
+                {
+                    <div class="d-flex justify-content-end mt-3">
+                        <a asp-controller="User" asp-action="Update" asp-route-id="@Model.Id" class="btn btn-sm btn-secondary rounded-pill">
+                            Редактировать
+                        </a>
+                    </div>
+                }
                 </div>
             </div>
             
@@ -140,6 +149,7 @@
                                                             form="delete-exercise-@exercise.Id">Удалить</button>
                                                 }
                                             </div>
+                                            
                                             @if (User.GetId() == Model.Id || User.IsInRole("Администратор"))
                                             {
                                                 <form id="delete-exercise-@exercise.Id"

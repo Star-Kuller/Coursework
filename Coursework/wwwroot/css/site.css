@@ -43,15 +43,17 @@ body {
   margin-top: auto;
 }
 
-.btn-group.rounded-pill > .btn:first-child {
-  border-top-left-radius: 50rem;
-  border-bottom-left-radius: 50rem;
-}
-.btn-group.rounded-pill > .btn:last-child {
-  border-top-right-radius: 50rem;
-  border-bottom-right-radius: 50rem;
+.btn-group.rounded-pill > :first-child,
+.input-group.rounded-pill > :first-child {
+    border-top-left-radius: 50rem;
+    border-bottom-left-radius: 50rem;
 }
 
+.btn-group.rounded-pill > :last-child,
+.input-group.rounded-pill > :last-child {
+    border-top-right-radius: 50rem;
+    border-bottom-right-radius: 50rem;
+}
 
 /* Стили для аккордеона подсказок */
 #hintsAccordion .accordion-button:not(.collapsed) {

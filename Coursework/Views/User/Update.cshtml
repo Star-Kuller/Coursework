@@ -1,0 +1,273 @@
+@using Coursework.Extensions
+@model Coursework.Models.Entities.User
+
+@{
+    ViewData["Title"] = $"Редактирование профиля {Model.Name}";
+    
+    string levelName;
+    string levelColor;
+    var currentScore = (int)Model.Score;
+    int nextLevelThreshold;
+    var previousLevelThreshold = 0;
+
+    switch (currentScore)
+    {
+        case < 5000:
+            levelName = "Уровень 1";
+            levelColor = "#198754";
+            nextLevelThreshold = 5000;
+            break;
+        case < 10000:
+            levelName = "Уровень 2";
+            levelColor = "#20c997";
+            previousLevelThreshold = 5000;
+            nextLevelThreshold = 10000;
+            break;
+        case < 20000:
+            levelName = "Уровень 3";
+            levelColor = "#ffc107";
+            previousLevelThreshold = 10000;
+            nextLevelThreshold = 20000;
+            break;
+        case < 40000:
+            levelName = "Уровень 4";
+            levelColor = "#fd7e14";
+            previousLevelThreshold = 20000;
+            nextLevelThreshold = 40000;
+            break;
+        default:
+            levelName = "Уровень 5";
+            levelColor = "#dc3545";
+            previousLevelThreshold = 40000;
+            nextLevelThreshold = 40000;
+            break;
+    }
+
+    // Расчет процента прогресса для текущего уровня
+    var levelRange = nextLevelThreshold - previousLevelThreshold;
+    var levelProgress = currentScore - previousLevelThreshold;
+    var progressPercentage = levelRange > 0 ? (levelProgress * 100) / levelRange : 100;
+    
+    var isAdmin = User.IsInRole("Администратор");
+    var isCurrentUser = User.GetId() == Model.Id;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <form method="post" asp-action="Update" asp-route-id="@Model.Id">
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Email" />
+                <input type="hidden" asp-for="PasswordHash" />
+                <input type="hidden" asp-for="Score" id="userScore" />
+                <input type="hidden" asp-for="RoleId" id="userRoleId" />
+                
+                <!-- Карточка профиля -->
+                <div class="card mb-4">
+                    <div class="card-body text-center">
+                        <div class="form-group mb-3">
+                            <input type="text" class="form-control form-control-lg text-center" asp-for="Name" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+                        
+                        <p class="text-muted">@Model.Role?.Name</p>
+                        
+                        @if (isAdmin && Model.Id != User.GetId())
+                        {
+                            <div class="mb-3">
+                                <button type="button" class="btn btn-sm btn-outline-secondary toggle-role-btn rounded-pill" 
+                                        data-current-role="@Model.RoleId" 
+                                        data-admin-role-id="1" 
+                                        data-user-role-id="2">
+                                    @(Model.RoleId == 1 ? "Сделать пользователем" : "Сделать администратором")
+                                </button>
+                            </div>
+                        }
+                        
+                        <div class="mt-4">
+                            <h3>
+                                <span class="badge" style="background-color: @levelColor;">@levelName</span>
+                                <span class="ms-2">@Model.Score очков</span>
+                            </h3>
+                            
+                            @if (levelName != "Уровень 5")
+                            {
+                                <div class="mt-3">
+                                    <div class="progress" style="height: 25px;">
+                                        <div class="progress-bar" 
+                                             role="progressbar" 
+                                             style="width: @progressPercentage%; background-color: @levelColor;" 
+                                             aria-valuenow="@progressPercentage" 
+                                             aria-valuemin="0" 
+                                             aria-valuemax="100">
+                                            @progressPercentage%
+                                        </div>
+                                    </div>
+                                    <small class="text-muted mt-1 d-block">
+                                        До следующего уровня: @(nextLevelThreshold - currentScore) очков
+                                    </small>
+                                </div>
+                            }
+                            
+                            @if (isAdmin)
+                            {
+                                <div class="mt-3 d-flex justify-content-center align-items-center">
+                                    <div class="input-group input-group-sm rounded-pill" style="max-width: 500px;">
+                                        <input type="number" class="form-control" id="scoreInput" value="100" min="1" />
+                                        <button type="button" class="btn ntn-sm btn-success score-btn" data-operation="add">
+                                            <i class="bi bi-plus-lg"></i> Добавить
+                                        </button>
+                                        <button type="button" class="btn btn-sm btn-danger score-btn" data-operation="subtract">
+                                            <i class="bi bi-dash-lg"></i> Вычесть
+                                        </button>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                        
+                        <div class="mt-4">
+                            <h4>О себе</h4>
+                            <div class="form-group">
+                                <textarea class="form-control" asp-for="About" rows="5" 
+                                          placeholder="Расскажите о себе..."></textarea>
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-secondary rounded-pill">Сохранить</button>
+                        </div>
+                    </div>
+                </div>
+            </form>
+            
+            <!-- Упражнения пользователя -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Упражнения</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Exercises.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Название</th>
+                                    <th scope="col">Сложность</th>
+                                    <th scope="col">Язык</th>
+                                    <th scope="col" class="text-end">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                @foreach (var exercise in Model.Exercises)
+                                {
+                                    <tr>
+                                        <td>@exercise.Name</td>
+                                        <td>@exercise.Difficulty?.Name</td>
+                                        <td>@exercise.Language?.Name</td>
+                                        <td class="text-end">
+                                            <div class="btn-group rounded-pill">
+                                                <a class="btn btn-sm btn-primary"
+                                                   asp-controller="Exercises"
+                                                   asp-action="View"
+                                                   asp-route-id="@exercise.Id">Посмотреть</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-center">Пользователь не создал ни одного упражнения</p>
+                    }
+                </div>
+            </div>
+            
+            <!-- Решения пользователя -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3>Решения</h3>
+                </div>
+                <div class="card-body">
+                    @if (Model.Solutions.Any())
+                    {
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th scope="col">Упражнение</th>
+                                    <th scope="col" class="text-end">Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody class="table-group-divider">
+                                @foreach (var solution in Model.Solutions)
+                                {
+                                    <tr>
+                                        <td><partial name="_ExerciseLink" model="@solution.Exercise" /></td>
+                                        <td class="text-end">
+                                            <div class="btn-group rounded-pill">
+                                                <a class="btn btn-sm btn-primary"
+                                                   asp-controller="Solution"
+                                                   asp-action="View"
+                                                   asp-route-id="@solution.Id">Посмотреть</a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    }
+                    else
+                    {
+                        <p class="text-center">Пользователь не создал ни одного решения</p>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Обработка изменения роли
+            $('.toggle-role-btn').click(function() {
+                const btn = $(this);
+                const currentRoleId = parseInt(btn.data('current-role'));
+                const adminRoleId = parseInt(btn.data('admin-role-id'));
+                const userRoleId = parseInt(btn.data('user-role-id'));
+                
+                // Переключаем роль
+                const newRoleId = currentRoleId === adminRoleId ? userRoleId : adminRoleId;
+                $('#userRoleId').val(newRoleId);
+                
+                // Обновляем текст кнопки
+                btn.text(newRoleId === adminRoleId ? 'Сделать пользователем' : 'Сделать администратором');
+                btn.data('current-role', newRoleId);
+            });
+            
+            // Обработка изменения очков
+            $('.score-btn').click(function() {
+                const operation = $(this).data('operation');
+                const scoreInput = parseInt($('#scoreInput').val());
+                const currentScore = parseInt($('#userScore').val());
+                
+                if (isNaN(scoreInput) || scoreInput <= 0) {
+                    alert('Пожалуйста, введите положительное число очков');
+                    return;
+                }
+                
+                let newScore = currentScore;
+                if (operation === 'add') {
+                    newScore = currentScore + scoreInput;
+                } else if (operation === 'subtract') {
+                    newScore = Math.max(0, currentScore - scoreInput);
+                }
+                
+                $('#userScore').val(newScore);
+                
+                $('.badge').next().text(newScore + ' очков');
+            });
+        });
+    </script>
+}

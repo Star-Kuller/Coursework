@@ -18,7 +18,7 @@ public class User : Entity
     [StringLength(255, ErrorMessage = "Хеш пароля не должен превышать 255 символов")]
     public string PasswordHash { get; set; }
     
-    public string About { get; set; } = "";
+    public string About { get; set; } = string.Empty;
     
     public long Score { get; set; } = 0;
     
