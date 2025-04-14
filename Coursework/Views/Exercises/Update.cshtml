@@ -2,11 +2,11 @@
 @model Coursework.Models.DTOs.ExerciseDto
 
 @{
-    ViewData["Title"] = "Редактировать упражнение";
+    ViewData["Title"] = "Редактировать задание";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Редактировать упражнение</h1>
+    <h1 class="display-4">Редактировать задание</h1>
 </div>
 
 <div class="container">
@@ -17,8 +17,8 @@
                     <form method="post" asp-controller="Exercises" asp-action="Update" id="exerciseForm">
                         <!-- Название -->
                         <div class="mb-3">
-                            <label for="Name" class="form-label">Название упражнения</label>
-                            <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название упражнения">
+                            <label for="Name" class="form-label">Название задание</label>
+                            <input type="text" class="form-control rounded-pill" id="Name" asp-for="Name" placeholder="Введите название задания">
                             <span asp-validation-for="Name" class="text-danger"></span>
                         </div>
 
@@ -65,7 +65,7 @@
                         <!-- Полное описание -->
                         <div class="mb-3">
                             <label for="FullDescription" class="form-label">Задание</label>
-                            <textarea class="form-control rounded" id="FullDescription" asp-for="FullDescription" rows="4" placeholder="Введите текст упражнения и задание"></textarea>
+                            <textarea class="form-control rounded" id="FullDescription" asp-for="FullDescription" rows="4" placeholder="Введите текст задания"></textarea>
                             <span asp-validation-for="FullDescription" class="text-danger"></span>
                         </div>
 

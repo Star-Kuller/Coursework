@@ -3,7 +3,7 @@
 @model Coursework.Models.DTOs.ExerciseDto
 
 @{
-    ViewData["Title"] = $"Упражнение {Model.Name}";
+    ViewData["Title"] = $"Задание {Model.Name}";
 }
 
 <div class="container mt-5">
@@ -73,7 +73,6 @@
                         <p style="white-space: pre-wrap;">@Model.FullDescription</p>
                     </div>
                     
-                    <!-- Replace the hints section with this updated version -->
                     <!-- Подсказки -->
                     <div class="mt-4">
                         <h5 class="text-muted">Подсказки:</h5>
@@ -115,7 +114,6 @@
                         </div>
                     </div>
                     
-                    <!-- Add this at the top of the view to display error messages -->
                     @if (TempData["ErrorMessage"] != null)
                     {
                         <div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -148,7 +146,7 @@
                                 <th scope="col" class="text-end">
                                     @if (User.GetId() == Model.AuthorId)
                                     {
-                                        <span>Вы автор, вы не можете загрузить решение на своё же задание.</span>
+                                        <span style="white-space: nowrap;">Вы автор, вы не можете загрузить решение на своё же задание.</span>
                                     }
                                     else
                                     {
@@ -196,7 +194,7 @@
                     }
                     else
                     {
-                        <p class="text-center">Для этого упражнения еще нет решений</p>
+                        <p class="text-center">Для этого задания еще нет решений</p>
                         @if (User.GetId() != Model.AuthorId)
                         {
                             <div class="text-center mt-3">

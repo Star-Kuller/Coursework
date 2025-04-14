@@ -27,6 +27,8 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         var solution = await uow.Solutions.GetAsync(id);
         if (solution is null)
             return NotFound();
+        if (solution.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
         
         return View(solution);
     }
@@ -71,6 +73,9 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         if (!ModelState.IsValid) return View(solution);
         
         await using var uow = await uowFactory.CreateAsync(ct);
+        
+        if (solution.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
         await uow.Solutions.UpdateAsync(solution);
         await uow.CommitAsync(ct);
         
@@ -88,6 +93,8 @@ public class SolutionController(IUnitOfWorkFactory uowFactory, ILogger<HomeContr
         var solution = await uow.Solutions.GetAsync(id);
         if (solution is null)
             return NotFound();
+        if (solution.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
         
         await uow.Solutions.DeleteAsync(id);
         await uow.CommitAsync(ct);

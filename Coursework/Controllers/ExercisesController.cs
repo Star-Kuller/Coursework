@@ -1,8 +1,6 @@
-using System.Security.Claims;
 using Coursework.Extensions;
 using Coursework.Interfaces.Database;
 using Coursework.Models.DTOs;
-using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -19,7 +17,9 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         var currentUserId = User.GetId();
         var exerciseDtos = exercises.Select(e => e.MapWithCurrentUser(currentUserId)).ToList();
 
-        ViewBag.Exercises = exerciseDtos;
+        ViewBag.Exercises = exerciseDtos.Where(x => x.IsPublished 
+                                                    || x.AuthorId == User.GetId() 
+                                                    || User.IsInRole("Администратор"));
         ViewBag.Search = search;
 
         return View();
@@ -46,6 +46,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         var exercise = await uow.Exercises.GetAsync(id);
         if (exercise is null)
             return NotFound();
+        if (exercise.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
 
         var difficultyLevels = await uow.DifficultyLevels.GetAllAsync();
         var languages = await uow.Languages.GetAllAsync();
@@ -123,6 +125,8 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
         var prev = await uow.Exercises.GetAsync(exercise.Id);
         if (prev is null)
             return NotFound();
+        if (prev.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
 
         var solution = prev.AuthorSolution;
         solution!.S3Key = exercise.S3KeyAuthorSolution;
@@ -145,6 +149,11 @@ public class ExercisesController(IUnitOfWorkFactory uowFactory, ILogger<HomeCont
     public async Task<IActionResult> Delete(long id, CancellationToken ct)
     {
         await using var uow = await uowFactory.CreateAsync(ct);
+        var exercise = await uow.Exercises.GetAsync(id);
+        if (exercise is null)
+            return NotFound();
+        if (exercise.AuthorId != User.GetId() && !User.IsInRole("Администратор"))
+            return Forbid();
         await uow.Exercises.DeleteAsync(id);
         await uow.CommitAsync(ct);
 

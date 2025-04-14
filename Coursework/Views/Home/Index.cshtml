@@ -2,9 +2,82 @@
     ViewData["Title"] = "Главная";
 }
 
-<div class="text-center mt-5">
-    <h1 class="display-4 mt-5">Добро пожаловать!</h1>
-    <h5>Это курсовая работа 2025 года</h5>
-    <p>Автор: Ежов Дмитрий Андреевич</p>
-    <p>Группа: 233-322</p>
+<div class="container py-5">
+    <div class="row justify-content-center mb-5">
+        <div class="col-md-10 text-center">
+            <h1 class="display-4 fw-bold mb-4">Практикум по фреймворкам</h1>
+            <p class="lead mb-4">Интерактивная платформа для изучения и практики современных фреймворков через решение реальных задач</p>
+            <div class="d-flex justify-content-center gap-3">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <a asp-controller="Exercises" asp-action="Index" class="btn btn-outline-secondary btn-lg">Просмотреть задания</a>
+                }
+                else
+                {
+                    <a asp-controller="Auth" asp-action="Register" class="btn btn-primary btn-lg">Начать обучение</a>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-code-square text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="card-title mt-3">Практические задания</h3>
+                    <p class="card-text">Решайте реальные задачи по разработке с использованием популярных фреймворков. Каждое задание сопровождается начальным кодом и автоматическими тестами.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-lightbulb text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="card-title mt-3">Система подсказок</h3>
+                    <p class="card-text">Зарабатывайте очки за решение заданий и используйте их для получения подсказок, когда столкнетесь с трудностями. Учитесь в своем темпе.</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="bi bi-people text-primary" style="font-size: 3rem;"></i>
+                    <h3 class="card-title mt-3">Сообщество</h3>
+                    <p class="card-text">Создавайте собственные задания, делитесь решениями и учитесь у других. Развивайте свои навыки вместе с сообществом разработчиков.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row mb-5">
+        <div class="col-md-6 offset-md-3">
+            <div class="card bg-light">
+                <div class="card-body">
+                    <h4 class="card-title text-center mb-3">Как это работает?</h4>
+                    <ol class="list-group list-group-numbered mb-0">
+                        <li class="list-group-item border-0 bg-transparent">Зарегистрируйтесь на платформе</li>
+                        <li class="list-group-item border-0 bg-transparent">Выберите задание по интересующему фреймворку</li>
+                        <li class="list-group-item border-0 bg-transparent">Скачайте начальный код и ознакомьтесь с требованиями</li>
+                        <li class="list-group-item border-0 bg-transparent">Разработайте решение и загрузите его на платформу</li>
+                        <li class="list-group-item border-0 bg-transparent">Получите результаты автоматической проверки и заработайте очки</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12 text-center">
+            <div class="card bg-primary text-white">
+                <div class="card-body py-4">
+                    <h2 class="card-title mb-3">О проекте</h2>
+                    <p class="card-text mb-4">Данный проект разработан в рамках курсовой работы и представляет собой образовательную платформу, направленную на практическое изучение фреймворков через решение реальных задач разработки.</p>
+                    <p class="mb-0"><strong>Автор:</strong> Ежов Дмитрий Андреевич</p>
+                    <p class="mb-0"><strong>Группа:</strong> 233-322</p>
+                    <p class="mb-0"><strong>Год:</strong> 2025</p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
