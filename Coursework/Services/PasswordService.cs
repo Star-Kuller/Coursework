@@ -1,5 +1,4 @@
 using Coursework.Interfaces.Services;
-using BCrypt.Net;
 
 namespace Coursework.Services;
 

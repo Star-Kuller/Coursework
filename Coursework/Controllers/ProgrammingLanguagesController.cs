@@ -1,6 +1,5 @@
 using Coursework.Extensions;
 using Coursework.Interfaces.Database;
-using Coursework.Models;
 using Coursework.Models.Entities;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
